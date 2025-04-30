@@ -1,0 +1,44 @@
+---
+import SectionTitle from './SectionTitle.astro';
+import SkillCategory from './SkillCategory.astro';
+
+const skillCategories = [
+  {
+    name: "Frontend",
+    skills: ["React", "Next.js", "TypeScript", "JavaScript", "React Hook Form"]
+  },
+  {
+    name: "Styles & UI",
+    skills: ["Tailwind CSS", "Material UI", "Styled Components"]
+  },
+  {
+    name: "State & Performance",
+    skills: ["Redux", "Zustand", "SWR", "React Server Components"]
+  },
+  {
+    name: "Testing",
+    skills: ["Jest", "Cypress", "React Testing Library"]
+  },
+  {
+    name: "Backend & APIs",
+    skills: ["Node.js", "GraphQL", "API Integration"]
+  },
+  {
+    name: "Tools",
+    skills: ["Git", "CI/CD", "Vercel", "Storybook"]
+  }
+];
+---
+
+<section id="skills" class="py-6 animate-fade-in">
+  <SectionTitle title="Skills" icon="🛠️" />
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    {skillCategories.map((category) => (
+      <SkillCategory 
+        name={category.name}
+        skills={category.skills}
+      />
+    ))}
+  </div>
+</section>

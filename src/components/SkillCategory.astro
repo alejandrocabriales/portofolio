@@ -1,0 +1,19 @@
+---
+interface Props {
+  name: string;
+  skills: string[];
+}
+
+const { name, skills } = Astro.props;
+---
+
+<div class="notion-block rounded-xl bg-white/30 dark:bg-neutral-800/30 backdrop-blur-sm p-6">
+  <h3 class="text-xl font-medium mb-4 gradient-text">{name}</h3>
+  <div class="flex flex-wrap gap-2">
+    {skills.map((skill) => (
+      <span class="px-3 py-1.5 bg-primary-100/50 dark:bg-primary-900/50 text-primary-700 dark:text-primary-300 rounded-full text-sm font-medium hover:scale-105 transition-transform cursor-default">
+        {skill}
+      </span>
+    ))}
+  </div>
+</div>

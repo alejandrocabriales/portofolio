@@ -1,0 +1,40 @@
+---
+import SectionTitle from './SectionTitle.astro';
+import ProjectItem from './ProjectItem.astro';
+
+const projects = [
+  {
+    title: "Fusion",
+    description: "Frontend in Next.js for an asset and investment management platform.",
+    technologies: ["Next.js", "React", "TypeScript", "Material UI"],
+    link: "#"
+  },
+  {
+    title: "Powerhouse Design System",
+    description: "Scalable design system with TypeScript and Tailwind CSS.",
+    technologies: ["TypeScript", "Tailwind CSS", "React", "Storybook"],
+    link: "#"
+  },
+  {
+    title: "MIPS Portal",
+    description: "Proposal management portal for MakerDAO using React and TypeScript.",
+    technologies: ["React", "TypeScript", "Redux", "Styled Components"],
+    link: "#"
+  }
+];
+---
+
+<section id="projects" class="py-6 animate-fade-in">
+  <SectionTitle title="Projects" icon="🚀" />
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+    {projects.map((project) => (
+      <ProjectItem 
+        title={project.title}
+        description={project.description}
+        technologies={project.technologies}
+        link={project.link}
+      />
+    ))}
+  </div>
+</section>
