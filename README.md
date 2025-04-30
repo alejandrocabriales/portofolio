@@ -1,4 +1,80 @@
-# Astro Starter Kit: Basics
+# Personal Portfolio
+
+A modern, Notion-inspired personal portfolio website built with Astro and Tailwind CSS. This project showcases my work, skills, and professional journey in a clean, minimalist design that takes inspiration from Notion's aesthetic.
+
+## 🎨 Design Philosophy
+
+- Clean, minimalist interface inspired by Notion's design language
+- Focus on typography and whitespace
+- Dark mode support
+- Responsive design for all devices
+- Smooth animations and transitions
+
+## 🚀 Tech Stack
+
+- [Astro](https://astro.build) - Modern static site builder
+- [Tailwind CSS](https://tailwindcss.com) - Utility-first CSS framework
+- TypeScript - For type safety and better developer experience
+
+## 📁 Project Structure
+
+```text
+/
+├── public/          # Static assets
+├── src/
+│   ├── components/  # Reusable UI components
+│   ├── layouts/     # Page layouts
+│   ├── pages/       # Astro pages
+│   └── styles/      # Global styles and Tailwind config
+└── package.json     # Project dependencies
+```
+
+## 🛠️ Development
+
+1. Clone the repository
+2. Install dependencies:
+   ```bash
+   npm install
+   # or
+   pnpm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm run dev
+   # or
+   pnpm dev
+   ```
+
+4. Build for production:
+   ```bash
+   npm run build
+   # or
+   pnpm build
+   ```
+
+## 📝 Features
+
+- ✨ Modern, Notion-inspired design
+- 🌙 Dark mode support
+- 📱 Fully responsive
+- ⚡ Fast performance with Astro
+- 🎨 Customizable theme
+- 📄 Markdown support for content
+- 🔍 SEO optimized
+
+## 🔗 Links
+
+- [Live Demo](https://your-portfolio-url.com)
+- [GitHub Repository](https://github.com/your-username/portfolio)
+
+## 📄 License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+
+---
+
+Built with ❤️ using Astro and Tailwind CSS
 
 ```sh
 npm create astro@latest -- --template basics
