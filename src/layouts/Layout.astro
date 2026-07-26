@@ -1,82 +1,58 @@
 ---
+import '@/styles/global.css';
+import ThemeScript from '@/components/ui/ThemeScript.astro';
+import { SITE } from '@/config/site';
+
 interface Props {
   title: string;
   description?: string;
 }
 
-const { 
-  title, 
-  description = "Manuel Cabriales  Toledo- Frontend Engineer specializing in React and Next.js" 
-} = Astro.props;
+const { title, description = SITE.description } = Astro.props;
+
+const canonical = new URL(Astro.url.pathname, Astro.site).href;
 ---
 
 <!doctype html>
-<html lang="en">
+<html lang={SITE.locale}>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width" />
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
-    <meta name="description" content={description} />
+
     <title>{title}</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+
+    <!-- Resolves the theme before paint — must stay above styled markup. -->
+    <ThemeScript />
   </head>
-  <body class="bg-gradient-to-br from-neutral-50 to-neutral-100 text-neutral-900 dark:from-neutral-900 dark:to-neutral-950 dark:text-neutral-50 min-h-screen">
-    <div class="fixed inset-0 -z-10 h-full w-full bg-white dark:bg-neutral-950 [background:radial-gradient(125%_125%_at_50%_10%,#fff_40%,#63e_100%)] dark:[background:radial-gradient(125%_125%_at_50%_10%,#000_40%,#63e_100%)] opacity-20"></div>
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8 pb-32">
-      <slot />
-    </div>
-    <script>
-      if (localStorage.getItem('theme') === 'dark' || 
-          (!localStorage.getItem('theme') && 
-           window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-        document.documentElement.classList.add('dark');
-      } else {
-        document.documentElement.classList.remove('dark');
+
+  <body class="bg-paper text-ink min-h-dvh">
+    <a href="#main" class="skip-link">Skip to content</a>
+    <slot />
+
+    <style>
+      /* Visible only on keyboard focus. Pointer users never see it; keyboard
+       * users get a way past the header instead of tabbing through it. */
+      .skip-link {
+        position: fixed;
+        top: var(--space-sm);
+        left: var(--space-sm);
+        z-index: 50;
+        padding: var(--space-2xs) var(--space-sm);
+        background-color: var(--color-paper);
+        color: var(--color-ink);
+        border: var(--rule-hair) solid var(--color-rule);
+        border-radius: var(--radius-md);
+        font-family: var(--font-mono);
+        font-size: 0.8125rem;
+        transform: translateY(-200%);
       }
-    </script>
+      .skip-link:focus-visible {
+        transform: translateY(0);
+      }
+    </style>
   </body>
 </html>
-
-<style is:global>
-  html {
-    font-family: 'Inter', system-ui, sans-serif;
-    scroll-behavior: smooth;
-  }
-  body {
-    margin: 0;
-    padding: 0;
-    min-height: 100vh;
-    line-height: 1.6;
-  }
-  * {
-    box-sizing: border-box;
-  }
-  h1, h2, h3, h4, h5, h6 {
-    line-height: 1.2;
-    margin: 0 0 0.5em 0;
-  }
-  .section-fade {
-    animation: fadeIn 0.5s ease-in-out;
-  }
-  .notion-block {
-    @apply py-2 px-3 transition-all duration-300 rounded-md hover:bg-white/50 dark:hover:bg-neutral-800/50 hover:shadow-lg hover:shadow-primary-500/5 backdrop-blur-sm;
-  }
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes float {
-    0% { transform: translateY(0px); }
-    50% { transform: translateY(-10px); }
-    100% { transform: translateY(0px); }
-  }
-  .float {
-    animation: float 6s ease-in-out infinite;
-  }
-  .gradient-text {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-400;
-  }
-</style>

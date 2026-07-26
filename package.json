@@ -3,17 +3,36 @@
   "type": "module",
   "version": "0.1.0",
   "private": true,
+  "packageManager": "pnpm@10.11.0",
+  "engines": {
+    "node": ">=20"
+  },
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
+    "build": "astro check && astro build && pagefind --site dist",
     "preview": "astro preview",
+    "check": "astro check",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.2.5"
+    "@astrojs/mdx": "^4.3.14",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.3",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/newsreader": "^5.3.0",
+    "@fontsource-variable/space-grotesk": "^5.3.0",
+    "astro": "^5.18.2"
   },
   "devDependencies": {
-    "@astrojs/tailwind": "^5.1.5",
-    "tailwindcss": "^3.4.17"
+    "@astrojs/check": "^0.9.9",
+    "@tailwindcss/vite": "^4.3.3",
+    "pagefind": "^1.5.2",
+    "tailwindcss": "^4.3.3",
+    "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "sharp": "^0.35.3"
+    }
   }
 }

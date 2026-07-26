@@ -1,22 +1,162 @@
 ---
-import Layout from '../layouts/Layout.astro';
-import Header from '../components/Header.astro';
-import AboutMe from '../components/AboutMe.astro';
-import Experience from '../components/Experience.astro';
-import Projects from '../components/Projects.astro';
-import Skills from '../components/Skills.astro';
-import Education from '../components/Education.astro';
-import Contact from '../components/Contact.astro';
-import Footer from '../components/Footer.astro';
+import Layout from '@/layouts/Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import Masthead from '@/components/sections/Masthead.astro';
+import ExperienceRow from '@/components/sections/ExperienceRow.astro';
+import ProjectCard from '@/components/sections/ProjectCard.astro';
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+
+import { SITE } from '@/config/site';
+import { EXPERIENCE, EDUCATION, LANGUAGES } from '@/data/experience';
+import { PROJECTS } from '@/data/projects';
+import { STACK } from '@/data/stack';
+import { PROFILE } from '@/data/profile';
+import { formatRange } from '@/lib/format';
+
+// The first project leads at a larger size; the rest share a grid.
+const [lead, ...rest] = PROJECTS;
 ---
 
-<Layout title="Manuel Cabriales Toledo | Frontend Engineer">
-  <Header />
-  <AboutMe />
-  <Experience />
-  <Projects />
-  <Skills />
-  <Education />
-  <Contact />
-  <Footer />
+<Layout title={`${SITE.name} — ${SITE.role}`}>
+  <Shell>
+    <main id="main">
+      <Masthead />
+
+      <IndexSection label="Profile" id="profile">
+        <div class="profile">
+          {PROFILE.summary.map((paragraph) => <p>{paragraph}</p>)}
+        </div>
+      </IndexSection>
+
+      <IndexSection label="Selected work" id="work">
+        <div class="work">
+          {lead && <ProjectCard project={lead} variant="lead" />}
+          <div class="work__grid">
+            {rest.map((project) => <ProjectCard project={project} />)}
+          </div>
+        </div>
+      </IndexSection>
+
+      <IndexSection label="Experience" id="experience">
+        {
+          EXPERIENCE.map((role) => (
+            <ExperienceRow role={role} meta={formatRange(role.start, role.end)} />
+          ))
+        }
+      </IndexSection>
+
+      <IndexSection label="Stack" id="stack">
+        <dl class="stack">
+          {
+            STACK.map((group) => (
+              <div class="stack__group">
+                <dt class="stack__label">{group.label}</dt>
+                <dd class="stack__items">{group.items.join(', ')}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </IndexSection>
+
+      <IndexSection label="Education" id="education">
+        <IndexRow
+          title={EDUCATION.degree}
+          subtitle={`${EDUCATION.institution} · ${EDUCATION.location}`}
+          meta={`${EDUCATION.start}–${EDUCATION.end}`}
+        />
+      </IndexSection>
+
+      <IndexSection label="Languages" id="languages">
+        {
+          LANGUAGES.map((language) => (
+            <IndexRow title={language.name} description={language.level} />
+          ))
+        }
+      </IndexSection>
+
+      <IndexSection label="Contact" id="contact">
+        <IndexRow
+          title="Email"
+          subtitle={SITE.email}
+          description="Fastest way to reach me. I reply to everything that isn't automated."
+          href={`mailto:${SITE.email}`}
+        />
+      </IndexSection>
+    </main>
+  </Shell>
 </Layout>
+
+<style>
+  .profile {
+    padding-block: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    /* Wider than the index rows because this is the one block that is read
+     * rather than scanned. */
+    max-inline-size: 64ch;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+    color: var(--color-muted);
+  }
+
+  /* The opening sentence carries the claim; give it full ink so the eye lands
+   * there first instead of treating the block as uniform grey. */
+  .profile > p:first-child {
+    color: var(--color-ink);
+  }
+
+  .work {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+    padding-block-start: var(--space-md);
+  }
+
+  .work__grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-sm);
+  }
+
+  /* An odd last card spans the row rather than leaving a hole — the asymmetry
+   * is deliberate, a gap would just look unfinished. */
+  .work__grid > :last-child:nth-child(odd) {
+    grid-column: 1 / -1;
+  }
+
+  @media (max-width: 40rem) {
+    .work__grid {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+
+  .stack__group {
+    display: grid;
+    grid-template-columns: 10rem minmax(0, 1fr);
+    gap: var(--space-md);
+    padding-block: var(--space-sm);
+    border-block-end: var(--rule-hair) solid var(--color-rule);
+  }
+
+  .stack__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+    line-height: 1.7;
+  }
+
+  .stack__items {
+    color: var(--color-muted);
+  }
+
+  @media (max-width: 40rem) {
+    .stack__group {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3xs);
+    }
+  }
+</style>
