@@ -11,6 +11,8 @@ import RelatedPosts from '@/components/blog/RelatedPosts.astro';
 import ReadingProgress from '@/components/blog/ReadingProgress.astro';
 
 import { getSiblings, getRelated, type Post } from '@/lib/posts';
+import { canonicalUrl, ogImagePathFor, resolveOgImage } from '@/lib/seo';
+import { blogPostingNode, breadcrumbNode } from '@/lib/schema';
 import '@/styles/prose.css';
 
 interface Props {
@@ -22,14 +24,52 @@ const { post, headings } = Astro.props;
 const { prev, next } = await getSiblings(post);
 const related = await getRelated(post);
 
-const url = new URL(Astro.url.pathname, Astro.site).href;
+const url = canonicalUrl(Astro.url);
+
+/**
+ * A post's own card when one has been generated, the site card otherwise.
+ * `resolveOgImage` does the existence check, so the schema and the meta tag
+ * always name the same file — a `BlogPosting.image` pointing at a 404 costs
+ * the article-with-thumbnail treatment in search results.
+ */
+const cardPath = post.data.image?.src ?? ogImagePathFor('blog', post.id);
+const card = resolveOgImage(cardPath);
+
+const crumbs = breadcrumbNode(url, [
+  { name: 'Home', path: '/' },
+  { name: 'Writing', path: '/blog/' },
+  { name: post.data.title },
+]);
 ---
 
-<Layout title={post.data.title} description={post.data.description}>
+<Layout
+  title={post.data.title}
+  description={post.data.description}
+  image={cardPath}
+  imageAlt={post.data.image?.alt ?? post.data.title}
+  ogType="article"
+  markdownAlternate={`/blog/${post.id}.md`}
+  article={{
+    published: post.data.published,
+    modified: post.data.updated,
+    section: post.data.category,
+    tags: post.data.tags,
+  }}
+  breadcrumbId={`${url}#breadcrumb`}
+  schema={[crumbs, blogPostingNode(post, url, card)]}
+>
   <ReadingProgress />
 
   <Shell>
     <main id="main">
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="/blog/">Writing</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{post.data.title}</span>
+      </nav>
+
       <!-- `data-pagefind-body` scopes the search index to article content, so
         the nav, footer and metadata don't pollute every result's excerpt. -->
       <article data-pagefind-body>
@@ -64,8 +104,32 @@ const url = new URL(Astro.url.pathname, Astro.site).href;
 </Layout>
 
 <style>
+  /* Matches the case-study trail so the two deep-route shapes read the same. */
+  .crumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    padding-block-start: var(--space-xl);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-faint);
+  }
+  .crumb a {
+    color: var(--color-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .crumb a:hover {
+    color: var(--color-accent-text);
+  }
+  /* The title can be long; it wraps rather than forcing the row to scroll. */
+  .crumb [aria-current] {
+    min-inline-size: 0;
+    overflow-wrap: anywhere;
+  }
+
   .post-header {
-    padding-block: var(--space-2xl) var(--space-lg);
+    padding-block: var(--space-lg) var(--space-lg);
   }
 
   .post-header__title {

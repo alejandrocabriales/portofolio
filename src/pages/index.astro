@@ -7,18 +7,35 @@ import ProjectCard from '@/components/sections/ProjectCard.astro';
 import IndexSection from '@/components/ui/IndexSection.astro';
 import IndexRow from '@/components/ui/IndexRow.astro';
 
-import { SITE } from '@/config/site';
+import { SITE, SOCIALS } from '@/config/site';
 import { EXPERIENCE, EDUCATION, LANGUAGES } from '@/data/experience';
 import { PROJECTS } from '@/data/projects';
 import { STACK } from '@/data/stack';
 import { PROFILE } from '@/data/profile';
 import { formatRange } from '@/lib/format';
+import { canonicalUrl } from '@/lib/seo';
+import { PERSON_ID, projectListNode } from '@/lib/schema';
 
 // The first project leads at a larger size; the rest share a grid.
 const [lead, ...rest] = PROJECTS;
+
+/**
+ * The index is a `ProfilePage` whose `mainEntity` is the Person — the schema.org
+ * type Google documents for "a page about one individual". On a portfolio that
+ * is not a technicality: it is the difference between the site reading as a
+ * collection of documents and reading as one person's profile.
+ */
+const canonical = canonicalUrl(Astro.url);
 ---
 
-<Layout title={`${SITE.name} — ${SITE.role}`}>
+<Layout
+  title={`${SITE.name} — ${SITE.role}`}
+  description={`${SITE.role}, ${SITE.yearsExperience} years shipping production React, Next.js and Node. Case studies with measured outcomes. ${SITE.location.city}, ${SITE.location.country}.`}
+  ogType="profile"
+  pageType="ProfilePage"
+  mainEntityId={PERSON_ID}
+  schema={[projectListNode(canonical, PROJECTS)]}
+>
   <Shell>
     <main id="main">
       <Masthead />
@@ -82,6 +99,33 @@ const [lead, ...rest] = PROJECTS;
           description="Fastest way to reach me. I reply to everything that isn't automated."
           href={`mailto:${SITE.email}`}
         />
+        {
+          /* The profiles were reachable only from the footer colophon, which is
+            the one part of a page nobody scrolls to deliberately. A recruiter
+            looking for a way to make contact looks under "Contact".
+
+            They also do double duty: these are the same URLs the Person node
+            lists in `sameAs`, so the page states the connection in HTML rather
+            than only asserting it in structured data. */
+          SOCIALS.linkedin && (
+            <IndexRow
+              title="LinkedIn"
+              subtitle="in/manuel-alejandro-cabriales-toledo"
+              description="Full work history, recommendations and the usual recruiter workflow."
+              href={SOCIALS.linkedin}
+            />
+          )
+        }
+        {
+          SOCIALS.github && (
+            <IndexRow
+              title="GitHub"
+              subtitle="@alejandrocabriales"
+              description="Source for the public work, including this site."
+              href={SOCIALS.github}
+            />
+          )
+        }
       </IndexSection>
     </main>
   </Shell>

@@ -1,6 +1,12 @@
 {
   "version": 1,
   "skills": {
+    "astro-seo": {
+      "source": "jdevalk/skills",
+      "sourceType": "github",
+      "skillPath": "astro-seo/SKILL.md",
+      "computedHash": "254a3027bc81e23f6ce5753f6920f97d8513f7b66c729a773816a74fc9793248"
+    },
     "hallmark": {
       "source": "nutlope/hallmark",
       "sourceType": "github",

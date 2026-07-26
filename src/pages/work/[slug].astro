@@ -8,6 +8,8 @@ import IndexRow from '@/components/ui/IndexRow.astro';
 
 import { PROJECTS, type Project } from '@/data/projects';
 import { SITE } from '@/config/site';
+import { canonicalUrl, ogImagePathFor } from '@/lib/seo';
+import { breadcrumbNode, projectNode } from '@/lib/schema';
 
 /** One case study per project. */
 export const getStaticPaths: GetStaticPaths = () =>
@@ -23,11 +25,34 @@ interface Props {
 const { project } = Astro.props;
 
 const others = PROJECTS.filter((p) => p.slug !== project.slug).slice(0, 3);
+
+const canonical = canonicalUrl(Astro.url);
+
+/** Mirrors the visible breadcrumb exactly — the two must not disagree. */
+const crumbs = breadcrumbNode(canonical, [
+  { name: 'Home', path: '/' },
+  { name: 'Work', path: '/#work' },
+  { name: project.name },
+]);
+
+/**
+ * The description leads with the measured outcome where one exists. A SERP
+ * snippet that opens with "First Contentful Paint improved by 40%" earns the
+ * click that "Asset and investment management platform" does not.
+ */
+const description = project.impact
+  ? `${project.summary} ${project.impact} Built at ${project.context}, ${project.year}.`
+  : `${project.summary} Built at ${project.context}, ${project.year}.`;
 ---
 
 <Layout
   title={`${project.name} — ${project.context} — ${SITE.shortName}`}
-  description={project.summary}
+  description={description}
+  image={ogImagePathFor('work', project.slug)}
+  imageAlt={`${project.name} — case study by ${SITE.name}`}
+  ogType="article"
+  breadcrumbId={`${canonical}#breadcrumb`}
+  schema={[crumbs, projectNode(project, canonical)]}
 >
   <Shell>
     <main id="main">

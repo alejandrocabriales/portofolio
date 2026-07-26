@@ -43,17 +43,19 @@ const year = new Date().getFullYear();
       <span>© {year}</span>
     </p>
 
-    {
-      links.length > 0 && (
-        <p class="colophon__line">
-          {links.map((link) => (
-            <a href={link.href} target="_blank" rel="noopener noreferrer me">
-              {link.label}
-            </a>
-          ))}
-        </p>
-      )
-    }
+    <p class="colophon__line">
+      {
+        links.map((link) => (
+          <a href={link.href} target="_blank" rel="noopener noreferrer me">
+            {link.label}
+          </a>
+        ))
+      }
+      <!-- Same-origin, so no `target`. The feed link is here rather than only
+        in <head> because a link a person can click is also a link a crawler
+        follows — head-only discovery reaches feed readers and nothing else. -->
+      <a href="/rss.xml">RSS</a>
+    </p>
 
     <p class="colophon__line colophon__line--faint">
       Built with Astro and Tailwind. Typeset in Space Grotesk, Newsreader and

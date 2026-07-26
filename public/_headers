@@ -22,6 +22,47 @@
 
   Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
 
+  # Campaign parameters change the URL but never the response. Without this,
+  # every ?utm_source= variant of a page is a separate cache entry, so the
+  # traffic most likely to arrive in a burst is the traffic guaranteed to miss
+  # the cache. Canonical tags already ignore the query string; this makes the
+  # cache agree with them.
+  No-Vary-Search: params=("utm_source" "utm_medium" "utm_campaign" "utm_term" "utm_content" "gclid" "fbclid" "ref")
+
+  # Discovery for clients that read headers instead of parsing HTML — an agent
+  # fetching any URL on this site learns where the index, the feed and the
+  # machine-readable summary live without a second request.
+  Link: </sitemap-index.xml>; rel="sitemap"; type="application/xml", </schemamap.xml>; rel="schemamap"; type="application/xml", </llms.txt>; rel="alternate"; type="text/plain", </rss.xml>; rel="alternate"; type="application/rss+xml"
+
+# Corpus structured data. Served as `application/ld+json` (the extension alone
+# would get it `application/json`), open to cross-origin readers because the
+# whole point is that other tools can fetch it, and kept out of the index —
+# it duplicates content that is already indexed properly as pages.
+/schema/*
+  Content-Type: application/ld+json; charset=utf-8
+  Access-Control-Allow-Origin: *
+  X-Robots-Tag: noindex
+
+# Hashed filenames: the content at a given URL can never change, so the browser
+# should never ask again. This is the single largest repeat-visit win available
+# on a static site, and Netlify does not apply it to `public/` output by default.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# Social cards and icons change only when regenerated, and every consumer
+# re-fetches on its own schedule anyway. A week is long enough to matter and
+# short enough that a corrected card is not stuck in a scraper's cache.
+/og/*
+  Cache-Control: public, max-age=604800
+/*.png
+  Cache-Control: public, max-age=604800
+/favicon.svg
+  Cache-Control: public, max-age=604800
+
+# The Pagefind index is content-hashed the same way the bundle is.
+/pagefind/*
+  Cache-Control: public, max-age=31536000, immutable
+
 # CSP notes, in the order the directives appear:
 #
 # script-src 'unsafe-inline'   — ThemeScript.astro is `is:inline` by necessity:

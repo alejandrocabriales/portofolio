@@ -1,16 +1,67 @@
 ---
 import '@/styles/global.css';
 import ThemeScript from '@/components/ui/ThemeScript.astro';
+import Seo from '@/components/seo/Seo.astro';
+import JsonLd from '@/components/seo/JsonLd.astro';
 import { SITE } from '@/config/site';
+import { canonicalUrl, resolveOgImage, clampDescription, type SeoProps } from '@/lib/seo';
+import { webPageNode, type SchemaNode } from '@/lib/schema';
 
-interface Props {
-  title: string;
-  description?: string;
+/**
+ * Pages pass their SEO surface here rather than assembling `<head>` themselves,
+ * so a new route cannot ship without a canonical, a card and a graph entry.
+ *
+ * `schema` holds page-specific nodes only. The Person and WebSite nodes are
+ * added by `graph()`, and the WebPage node is derived below — a route only
+ * describes what is unique about it.
+ */
+interface Props extends Omit<SeoProps, 'description'> {
+  description?: string | undefined;
+  /** Page-specific JSON-LD nodes, merged into the site graph. */
+  schema?: SchemaNode[] | undefined;
+  /** Overrides the derived WebPage node's type. */
+  pageType?: 'WebPage' | 'ProfilePage' | 'CollectionPage' | 'AboutPage' | undefined;
+  /** `@id` of a node in `schema` that this page is primarily about. */
+  mainEntityId?: string | undefined;
+  /** `@id` of a BreadcrumbList in `schema`. */
+  breadcrumbId?: string | undefined;
 }
 
-const { title, description = SITE.description } = Astro.props;
+const {
+  title,
+  description = SITE.description,
+  image,
+  imageAlt,
+  ogType,
+  noindex,
+  markdownAlternate,
+  article,
+  schema = [],
+  pageType,
+  mainEntityId,
+  breadcrumbId,
+} = Astro.props;
 
-const canonical = new URL(Astro.url.pathname, Astro.site).href;
+/**
+ * The description is clamped once, here, so the meta tag, the OG card and the
+ * WebPage node all carry the identical string. Google flags mismatched
+ * descriptions across those surfaces as a quality signal against the page.
+ */
+const metaDescription = clampDescription(description);
+const canonical = canonicalUrl(Astro.url);
+
+const nodes: SchemaNode[] = [
+  webPageNode({
+    url: canonical,
+    title,
+    description: metaDescription,
+    image: resolveOgImage(image),
+    ...(pageType ? { type: pageType } : {}),
+    breadcrumbId,
+    mainEntityId,
+  }),
+  ...schema,
+];
 ---
 
 <!doctype html>
@@ -18,12 +69,19 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="generator" content={Astro.generator} />
 
-    <title>{title}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonical} />
+    <Seo
+      title={title}
+      description={metaDescription}
+      image={image}
+      imageAlt={imageAlt}
+      ogType={ogType}
+      noindex={noindex}
+      markdownAlternate={markdownAlternate}
+      article={article}
+    />
+    <JsonLd nodes={nodes} />
 
     <!-- Resolves the theme before paint — must stay above styled markup. -->
     <ThemeScript />

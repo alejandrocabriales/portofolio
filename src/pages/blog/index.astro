@@ -8,14 +8,25 @@ import Search from '@/components/blog/Search.astro';
 import { getIndexedPosts, getTags, postPath, readingTime } from '@/lib/posts';
 import { formatDate } from '@/lib/format';
 import { SITE } from '@/config/site';
+import { canonicalUrl } from '@/lib/seo';
+import { blogNode } from '@/lib/schema';
 
 const posts = await getIndexedPosts();
 const tags = await getTags();
+
+/**
+ * No BreadcrumbList here: the page renders no visible trail, and Google's
+ * guidance is that structured data describe what is on the page. The deep
+ * routes that *do* show a trail carry the markup.
+ */
+const canonical = canonicalUrl(Astro.url);
 ---
 
 <Layout
-  title={`Writing — ${SITE.shortName}`}
-  description="Notes on React, Next.js, Node, TypeScript, architecture and the LLM tooling I actually use in production."
+  title={`Writing on React, Next.js and Node — ${SITE.shortName}`}
+  description="Notes on React internals, Next.js rendering, Node API design and the architecture decisions behind them — written while building, not after."
+  pageType="CollectionPage"
+  schema={[blogNode(canonical, posts)]}
 >
   <Shell>
     <main id="main">

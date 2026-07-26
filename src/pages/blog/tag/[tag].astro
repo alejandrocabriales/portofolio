@@ -9,6 +9,8 @@ import IndexRow from '@/components/ui/IndexRow.astro';
 import { getPublishedPosts, postPath, readingTime, type Post } from '@/lib/posts';
 import { formatDate } from '@/lib/format';
 import { SITE } from '@/config/site';
+import { canonicalUrl } from '@/lib/seo';
+import { breadcrumbNode } from '@/lib/schema';
 
 /** One archive page per tag that actually has posts — no empty archives. */
 export const getStaticPaths: GetStaticPaths = async () => {
@@ -33,11 +35,35 @@ interface Props {
 }
 
 const { tag, posts } = Astro.props;
+
+const canonical = canonicalUrl(Astro.url);
+const crumbs = breadcrumbNode(canonical, [
+  { name: 'Home', path: '/' },
+  { name: 'Writing', path: '/blog/' },
+  { name: `#${tag}` },
+]);
+
+/**
+ * `noindex, follow` on tag archives.
+ *
+ * Every one of these pages is a filtered subset of `/blog/` — same titles, same
+ * descriptions, no prose of its own. Indexed, they compete with the posts they
+ * link to and dilute the site's crawl budget across near-duplicates. `follow`
+ * keeps them doing the one job they are good at: passing crawlers through to
+ * the posts. They stay out of the sitemap for the same reason.
+ *
+ * Flip this off if a tag ever grows its own written introduction.
+ */
+const titles = posts.map((post) => post.data.title).slice(0, 3).join(', ');
 ---
 
 <Layout
   title={`#${tag} — Writing — ${SITE.shortName}`}
-  description={`Posts tagged ${tag} by ${SITE.name}.`}
+  description={`Every post tagged ${tag} by ${SITE.name}${titles ? `: ${titles}` : ''}.`}
+  noindex
+  pageType="CollectionPage"
+  breadcrumbId={`${canonical}#breadcrumb`}
+  schema={[crumbs]}
 >
   <Shell>
     <main id="main">
@@ -46,6 +72,11 @@ const { tag, posts } = Astro.props;
         <span aria-hidden="true">/</span>
         <span aria-current="page">#{tag}</span>
       </nav>
+
+      <!-- Every page needs exactly one h1, including the ones that opt out of
+        the index: a screen reader announces the document's heading regardless
+        of what `robots` says, and "#astro" is a better answer than silence. -->
+      <h1 class="tag-title">#{tag}</h1>
 
       <IndexSection
         label={`${posts.length} post${posts.length === 1 ? '' : 's'} tagged ${tag}`}
@@ -84,5 +115,11 @@ const { tag, posts } = Astro.props;
   }
   .crumb a:hover {
     color: var(--color-accent-text);
+  }
+
+  .tag-title {
+    padding-block: var(--space-md) var(--space-xs);
+    font-size: var(--text-display-s);
+    letter-spacing: -0.03em;
   }
 </style>

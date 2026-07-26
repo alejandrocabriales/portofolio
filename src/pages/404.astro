@@ -1,0 +1,91 @@
+---
+/**
+ * Not found.
+ *
+ * A static host answers an unknown path with this page — which means it is a
+ * page a crawler can reach, so it carries `noindex`. Without that, a mistyped
+ * inbound link becomes an indexed URL whose content is "nothing here".
+ *
+ * The links are the point: a 404 that only apologises wastes the one moment a
+ * visitor is actively looking for something on this site.
+ */
+import Layout from '@/layouts/Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+
+import { PROJECTS } from '@/data/projects';
+import { SITE } from '@/config/site';
+---
+
+<Layout
+  title={`Page not found — ${SITE.shortName}`}
+  description="That page does not exist. The case studies, the writing and a way to get in touch are all one click away from here."
+  noindex
+>
+  <Shell>
+    <!-- Kept out of the site search too: a 404 is not a destination, and
+      Pagefind would otherwise return it as a result for its own link text. -->
+    <main id="main" data-pagefind-ignore>
+      <section class="lost">
+        <p class="lost__code">404</p>
+        <h1 class="lost__title">That page isn't here.</h1>
+        <p class="lost__lede">
+          The link is either out of date or was never right. Everything the site
+          does have is one click away.
+        </p>
+      </section>
+
+      <IndexSection label="Selected work" id="work" action={{ label: 'All work →', href: '/#work' }}>
+        {
+          PROJECTS.slice(0, 3).map((project) => (
+            <IndexRow
+              title={project.name}
+              subtitle={project.context}
+              description={project.summary}
+              meta={project.year}
+              href={`/work/${project.slug}/`}
+            />
+          ))
+        }
+      </IndexSection>
+
+      <IndexSection label="Elsewhere" id="elsewhere">
+        <IndexRow title="Home" description="Profile, experience and stack." href="/" />
+        <IndexRow title="Writing" description="Notes on React, Next.js and Node." href="/blog/" />
+        <IndexRow
+          title="Email"
+          subtitle={SITE.email}
+          description="Fastest way to reach me."
+          href={`mailto:${SITE.email}`}
+        />
+      </IndexSection>
+    </main>
+  </Shell>
+</Layout>
+
+<style>
+  .lost {
+    padding-block: var(--space-2xl) var(--space-lg);
+  }
+
+  .lost__code {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.16em;
+    color: var(--color-accent-text);
+  }
+
+  .lost__title {
+    margin-block-start: var(--space-2xs);
+    font-size: var(--text-display-s);
+    letter-spacing: -0.03em;
+  }
+
+  .lost__lede {
+    margin-block-start: var(--space-md);
+    max-inline-size: 52ch;
+    font-size: 1.0625rem;
+    color: var(--color-muted);
+  }
+</style>

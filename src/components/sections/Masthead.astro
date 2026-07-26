@@ -52,7 +52,13 @@ const rail = [
 
   <h1 id="masthead-title" class="masthead__title">Systems that hold up in production.</h1>
 
-  <p class="masthead__role">{SITE.role}</p>
+  <!-- The name belongs in the page body, not only in the nav wordmark and the
+    <title>. The h1 makes a claim rather than stating an identity — which is the
+    right call for a reader and the wrong one for a search engine trying to work
+    out whose site this is, so the line under it carries both. -->
+  <p class="masthead__role">
+    <strong>{SITE.name}</strong> — {SITE.role}
+  </p>
 
   <dl class="rail">
     {
@@ -109,6 +115,13 @@ const rail = [
     font-size: 0.875rem;
     letter-spacing: 0.02em;
     color: var(--color-muted);
+  }
+
+  /* Full ink on the name only — the rail below is already mono grey, and this
+   * line has to read as an attribution rather than as one more fact. */
+  .masthead__role strong {
+    font-weight: 500;
+    color: var(--color-ink);
   }
 
   .rail {

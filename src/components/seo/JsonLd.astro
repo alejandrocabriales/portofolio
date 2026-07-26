@@ -1,0 +1,30 @@
+---
+/**
+ * Emits the page's structured-data graph.
+ *
+ * Uses set:html rather than a template expression: Astro escapes interpolated
+ * text for HTML, and an escaped ampersand or angle bracket inside a JSON-LD
+ * block makes the whole document unparseable. The payload is JSON.stringify
+ * output built from our own data — never request input — so there is nothing
+ * here to inject.
+ *
+ * A closing script tag is the one sequence that could still break out of the
+ * block, so the substitution below neutralises it. A post whose title contains
+ * one is unlikely, but the failure would be silent and total.
+ *
+ * Note for editors: keep raw angle brackets out of this comment. Astro's
+ * compiler scans the frontmatter for markup, and one here is enough to detach
+ * the Props interface from Astro.props — which fails as a type error several
+ * lines below, with no hint that a comment caused it.
+ */
+import { graph, type SchemaNode } from '@/lib/schema';
+
+interface Props {
+  nodes: SchemaNode[];
+}
+
+const { nodes }: Props = Astro.props;
+const json = graph(nodes).replace(/<\/(script)/gi, '<\\/$1');
+---
+
+<script type="application/ld+json" is:inline set:html={json} />

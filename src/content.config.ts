@@ -21,8 +21,15 @@ import { glob } from 'astro/loaders';
 const blog = defineCollection({
   loader: glob({ base: './src/content/blog', pattern: '**/*.{md,mdx}' }),
   schema: z.object({
-    title: z.string().max(120),
-    description: z.string().min(50).max(200),
+    /**
+     * Bounds are the SERP's, not an editorial preference. A title over ~70
+     * characters and a description over ~160 are cut off in a result, and the
+     * cut lands mid-word — so the last thing a searcher reads is a fragment.
+     * Enforcing it here fails the build at the source of the problem, instead
+     * of at `seo-validate` after the page has already been rendered.
+     */
+    title: z.string().min(20).max(70),
+    description: z.string().min(70).max(160),
     published: z.coerce.date(),
     updated: z.coerce.date().optional(),
 

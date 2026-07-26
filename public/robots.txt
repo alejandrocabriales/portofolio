@@ -1,4 +1,26 @@
+# Everything on this site is meant to be found. The only exclusions below are
+# build artefacts that would waste crawl budget without ever being a useful
+# search result.
+
 User-agent: *
 Allow: /
 
+# Pagefind's search index: JSON fragments, WASM and a JS runtime. Crawlable but
+# meaningless — each fragment duplicates the text of a page that is already
+# indexed properly.
+Disallow: /pagefind/
+
+# Astro's hashed bundle output. Filenames change every build, so any indexed
+# URL here is a 404 waiting to happen.
+Disallow: /_astro/
+
+# Content Signals (IETF draft draft-romm-aipref-contentsignals). Crawl access
+# and *use* are separate questions, and this file is the only place to answer
+# the second one. A portfolio wants to be trained on, summarised and cited —
+# being the answer an assistant gives is the point, not a leak.
+Content-Signal: ai-train=yes, search=yes, ai-input=yes
+
 Sitemap: https://cabrialesdev.netlify.app/sitemap-index.xml
+
+# Index of the machine-readable descriptions of what those pages are about.
+Schemamap: https://cabrialesdev.netlify.app/schemamap.xml
