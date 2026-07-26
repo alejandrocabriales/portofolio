@@ -1,0 +1,242 @@
+/* Hallmark · genre: modern-minimal · theme: custom
+ * vibe: precise, warm, engineered, quiet
+ * paper  oklch(97.5% 0.006 70)  light  ·  oklch(15% 0.010 60)  dark
+ * accent oklch(58%  0.160 52)   light  ·  oklch(70% 0.140 55)  dark
+ * display Space Grotesk · body Newsreader · mono JetBrains Mono
+ * axes: light paper-band / grotesk-sans display / warm accent
+ * macrostructure: pending — chosen when the page is rebuilt against real CV content
+ */
+
+@import '@fontsource-variable/space-grotesk';
+@import '@fontsource-variable/newsreader';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'tailwindcss';
+
+/* Tailwind v4 resolves `dark:` against prefers-color-scheme by default. The
+ * theme toggle writes a class, so the variant has to follow the class instead —
+ * otherwise a manual override silently loses to the OS setting. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------------------
+ * Theme bridge
+ *
+ * `@theme inline` emits utilities that point at `var(--…)` rather than copying
+ * the value, so a single `.dark` block below re-points every utility at once.
+ * Without `inline`, dark mode would need a duplicate utility set.
+ * ------------------------------------------------------------------------ */
+@theme inline {
+  --color-paper: var(--paper);
+  --color-paper-2: var(--paper-2);
+  --color-paper-3: var(--paper-3);
+  --color-rule: var(--rule);
+  --color-faint: var(--faint);
+  --color-muted: var(--muted);
+  --color-ink: var(--ink);
+  --color-accent: var(--accent);
+  --color-accent-text: var(--accent-text);
+  --color-focus: var(--focus);
+
+  --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Newsreader Variable', ui-serif, Georgia, serif;
+  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
+}
+
+/* ---------------------------------------------------------------------------
+ * Palette — anchor hue ~60 (warm amber)
+ *
+ * Neutrals carry a trace of the anchor's chroma so the page reads warm rather
+ * than flat grey. Contrast ratios against paper are noted where they constrain
+ * usage; `--faint` is the only step that cannot legally carry body text.
+ * ------------------------------------------------------------------------ */
+:root {
+  color-scheme: light;
+
+  --paper: oklch(97.5% 0.006 70); /* never #fff — tinted off-white */
+  --paper-2: oklch(95% 0.008 70); /* recessed wells, code blocks   */
+  --paper-3: oklch(92.5% 0.009 70); /* hover surface               */
+  --rule: oklch(87% 0.008 70); /* hairlines only                   */
+  --faint: oklch(58% 0.012 62); /* ~3.2:1 — large text + icons ONLY */
+  --muted: oklch(44% 0.013 60); /* ~5.9:1 — safe for body copy      */
+  --ink: oklch(20% 0.014 60); /* ~14:1                              */
+
+  --accent: oklch(58% 0.16 52); /* marks, rules, fills — not text   */
+  --accent-text: oklch(48% 0.17 50); /* ~5.1:1 — links and inline    */
+  --focus: oklch(52% 0.19 52);
+
+  /* 4pt scale */
+  --space-3xs: 0.25rem;
+  --space-2xs: 0.5rem;
+  --space-xs: 0.75rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2rem;
+  --space-xl: 3rem;
+  --space-2xl: 4rem;
+  --space-3xl: 6rem;
+  --space-4xl: 8rem;
+
+  /* Fluid display sizes. Body steps stay fixed — fluid body text harms
+   * readability more than it helps. */
+  --text-display: clamp(2.75rem, 1.6rem + 5.2vw, 5.5rem);
+  --text-display-s: clamp(2rem, 1.4rem + 2.8vw, 3.5rem);
+  --text-title: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+
+  --dur-micro: 120ms;
+  --dur-short: 220ms;
+  --dur-long: 420ms;
+
+  --rule-hair: 1px;
+  --radius-sm: 2px;
+  --radius-md: 4px;
+}
+
+/* Dark mode keeps the anchor hue and moves only lightness and chroma, per the
+ * palette recipe — switching hue between modes reads as two different brands. */
+.dark {
+  color-scheme: dark;
+
+  --paper: oklch(15% 0.01 60); /* never #000 */
+  --paper-2: oklch(18.5% 0.011 60);
+  --paper-3: oklch(22% 0.012 60); /* elevation by lightness, not shadow */
+  --rule: oklch(30% 0.01 60);
+  --faint: oklch(58% 0.011 60); /* ~4.8:1 — dark mode is more forgiving */
+  --muted: oklch(72% 0.009 62); /* ~7.2:1 */
+  --ink: oklch(94% 0.008 70); /* ~13.9:1 */
+
+  --accent: oklch(70% 0.14 55); /* lifted lightness, reduced chroma */
+  --accent-text: oklch(74% 0.13 55);
+  --focus: oklch(74% 0.15 55);
+}
+
+@layer base {
+  html {
+    font-family: var(--font-body);
+    /* Opt out of smooth scroll for users who asked motion to stop — the
+     * unguarded `scroll-behavior: smooth` in the previous build was a
+     * vestibular trigger with no escape hatch. */
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  /* `clip` not `hidden`: `hidden` on the root silently kills position:sticky. */
+  html,
+  body {
+    overflow-x: clip;
+  }
+
+  body {
+    background-color: var(--color-paper);
+    color: var(--color-ink);
+    font-size: 1rem;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Light text on dark surfaces reads optically heavier; drop the body weight
+   * to compensate so dark mode doesn't look bolder than light. */
+  .dark body {
+    font-weight: 350;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    font-style: normal; /* headings are roman — never italic */
+    line-height: 1.08;
+    letter-spacing: -0.02em;
+    text-wrap: balance;
+    /* Long unbroken tokens (URLs, PascalCase) must not force a scrollbar. */
+    overflow-wrap: anywhere;
+    min-width: 0;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Dates, durations and any column of figures align only with lining
+   * tabular figures — Newsreader ships proportional oldstyle by default. */
+  time,
+  .tabular {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+
+  code,
+  kbd,
+  pre,
+  samp {
+    font-family: var(--font-mono);
+    font-feature-settings: 'liga' 0;
+  }
+
+  /* Rings appear instantly and are never transitioned — an animated ring
+   * leaves keyboard users with no indicator during the fade. */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+    border-radius: var(--radius-sm);
+  }
+
+  :focus:not(:focus-visible) {
+    outline: none;
+  }
+
+  ::selection {
+    background-color: var(--color-accent);
+    color: var(--color-paper);
+  }
+
+  ::placeholder {
+    color: var(--color-muted);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+ * Page-load orchestration — one sequence, staggered in CSS by DOM index.
+ * No IntersectionObserver, no scroll listener, no JS.
+ * ------------------------------------------------------------------------ */
+@layer utilities {
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: reveal var(--dur-long) var(--ease-out) forwards;
+    animation-delay: calc(var(--i, 0) * 60ms);
+  }
+
+  @keyframes reveal {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 150ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 150ms !important;
+  }
+
+  /* Spatial motion collapses to a crossfade — the content still arrives. */
+  .reveal {
+    transform: none;
+    animation-delay: 0ms;
+  }
+}

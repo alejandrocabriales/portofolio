@@ -1,0 +1,87 @@
+---
+/**
+ * Previous / next navigation.
+ *
+ * Labels carry the post title, not just "Previous" — a bare direction word
+ * gives the reader nothing to decide with, and screen-reader users hear a list
+ * of identical links.
+ */
+import { postPath, type Post } from '@/lib/posts';
+
+interface Props {
+  prev: Post | null;
+  next: Post | null;
+}
+
+const { prev, next } = Astro.props;
+---
+
+{
+  (prev || next) && (
+    <nav class="post-nav" aria-label="More posts">
+      {next && (
+        <a class="post-nav__link" href={postPath(next)} rel="next">
+          <span class="post-nav__dir">Newer</span>
+          <span class="post-nav__title">{next.data.title}</span>
+        </a>
+      )}
+      {prev && (
+        <a class="post-nav__link post-nav__link--end" href={postPath(prev)} rel="prev">
+          <span class="post-nav__dir">Older</span>
+          <span class="post-nav__title">{prev.data.title}</span>
+        </a>
+      )}
+    </nav>
+  )
+}
+
+<style>
+  .post-nav {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(0, 1fr));
+    gap: var(--space-md);
+    margin-block-start: var(--space-xl);
+  }
+
+  .post-nav__link {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+    padding: var(--space-sm) 0;
+    border-block-start: var(--rule-hair) solid var(--color-ink);
+    text-decoration: none;
+  }
+
+  /* When both links are present, the older one aligns to the far edge so the
+   * pair reads as a spread rather than two stacked cards. */
+  .post-nav__link--end:not(:only-child) {
+    text-align: end;
+  }
+
+  .post-nav__dir {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .post-nav__title {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    line-height: 1.35;
+    color: var(--color-ink);
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+
+  .post-nav__link:hover .post-nav__title {
+    color: var(--color-accent-text);
+  }
+
+  @media (max-width: 40rem) {
+    .post-nav__link--end:not(:only-child) {
+      text-align: start;
+    }
+  }
+</style>

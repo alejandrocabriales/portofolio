@@ -1,0 +1,163 @@
+---
+/**
+ * A single row of the index.
+ *
+ * Renders as `<a>` when `href` is set and `<div>` otherwise, so a row without a
+ * destination is never a fake link. External rows get `rel="noopener
+ * noreferrer"` automatically — the previous build applied it inconsistently.
+ *
+ * Hover carries exactly one motion (the arrow) plus one state change (title
+ * colour). No lift, no scale, no shadow.
+ */
+
+interface Props {
+  title: string;
+  /** Sits under the title — the company, the client, the one-line summary. */
+  subtitle?: string | undefined;
+  /** Right-aligned mono metadata, usually a date or date range. */
+  meta?: string | undefined;
+  description?: string | undefined;
+  /** Short tokens rendered as mono text, not pills. */
+  tags?: string[] | undefined;
+  href?: string | null | undefined;
+}
+
+const { title, subtitle, meta, description, tags = [], href } = Astro.props;
+
+const isExternal = Boolean(href && /^https?:\/\//.test(href));
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag
+  class:list={['index-row', { 'index-row--link': Boolean(href) }]}
+  {...href ? { href } : {}}
+  {...isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {}}
+>
+  <div class="index-row__main">
+    <p class="index-row__title">
+      {title}
+      {
+        href && (
+          <svg
+            class="index-row__arrow"
+            viewBox="0 0 16 16"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="1.5"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            {
+              isExternal ? (
+                <path d="M5 11 11 5M6 5h5v5" />
+              ) : (
+                <path d="M3 8h10M9 4l4 4-4 4" />
+              )
+            }
+          </svg>
+        )
+      }
+    </p>
+    {subtitle && <p class="index-row__subtitle">{subtitle}</p>}
+    {description && <p class="index-row__description">{description}</p>}
+    {
+      tags.length > 0 && (
+        <p class="index-row__tags">
+          {tags.map((tag) => (
+            <span>{tag}</span>
+          ))}
+        </p>
+      )
+    }
+  </div>
+  {meta && <time class="index-row__meta">{meta}</time>}
+</Tag>
+
+<style>
+  .index-row {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: baseline;
+    gap: var(--space-sm);
+    padding-block: var(--space-md);
+    border-block-end: var(--rule-hair) solid var(--color-rule);
+    color: inherit;
+    text-decoration: none;
+  }
+
+  .index-row__title {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-family: var(--font-display);
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+    line-height: 1.3;
+    color: var(--color-ink);
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+
+  .index-row__arrow {
+    inline-size: 0.875rem;
+    block-size: 0.875rem;
+    flex: none;
+    color: var(--color-faint);
+    transition:
+      transform var(--dur-short) var(--ease-out),
+      color var(--dur-micro) var(--ease-out);
+  }
+
+  .index-row--link:hover .index-row__title {
+    color: var(--color-accent-text);
+  }
+  .index-row--link:hover .index-row__arrow {
+    color: var(--color-accent-text);
+    transform: translateX(2px);
+  }
+
+  .index-row__subtitle {
+    margin-block-start: var(--space-3xs);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+
+  .index-row__description {
+    margin-block-start: var(--space-2xs);
+    /* Held well under 75ch so lines stay scannable. */
+    max-inline-size: 58ch;
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+
+  .index-row__tags {
+    margin-block-start: var(--space-xs);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-faint);
+  }
+
+  .index-row__meta {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--color-faint);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 40rem) {
+    .index-row {
+      grid-template-columns: 1fr;
+      gap: var(--space-3xs);
+    }
+    /* Metadata leads on mobile — it is the scannable axis on a small screen. */
+    .index-row__meta {
+      order: -1;
+    }
+  }
+</style>

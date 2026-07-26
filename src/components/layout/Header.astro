@@ -1,0 +1,150 @@
+---
+/**
+ * N5 · Floating pill nav.
+ *
+ * Detached from the page edge, sticky, with the wordmark left, destinations
+ * centre-right and a single contact affordance at the end. Replaces the earlier
+ * edge-aligned nav now that Writing is a real destination rather than a section
+ * of the index.
+ *
+ * Deliberately not N1a (wordmark + inline links + button, flush to a full-width
+ * hairline bar) — that shape is the most-recognised AI nav fingerprint.
+ *
+ * `backdrop-filter` here is load-bearing, not decoration: the bar floats over
+ * scrolling content and needs to read as a layer above it.
+ */
+import ThemeToggle from '@/components/ui/ThemeToggle.astro';
+import { SITE, NAV } from '@/config/site';
+
+const path = Astro.url.pathname;
+---
+
+<header class="nav-wrap">
+  <nav class="nav" aria-label="Primary">
+    <a href="/" class="nav__wordmark">
+      <span class="nav__dot" aria-hidden="true"></span>
+      {SITE.shortName}
+    </a>
+
+    <ul class="nav__list">
+      {
+        NAV.map((item) => {
+          const active = item.href.startsWith('/blog') && path.startsWith('/blog');
+          return (
+            <li>
+              <a href={item.href} aria-current={active ? 'page' : undefined}>
+                {item.label}
+              </a>
+            </li>
+          );
+        })
+      }
+    </ul>
+
+    <div class="nav__end">
+      <a href={`mailto:${SITE.email}`} class="nav__cta">Email</a>
+      <ThemeToggle />
+    </div>
+  </nav>
+</header>
+
+<style>
+  .nav-wrap {
+    position: sticky;
+    inset-block-start: 0;
+    z-index: 30;
+    padding-block: var(--space-sm);
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-sm);
+    padding: var(--space-3xs) var(--space-3xs) var(--space-3xs) var(--space-sm);
+    border: var(--rule-hair) solid var(--color-rule);
+    border-radius: 999px;
+    background-color: color-mix(in oklab, var(--color-paper) 82%, transparent);
+    backdrop-filter: blur(12px);
+  }
+
+  .nav__wordmark {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    letter-spacing: 0.01em;
+    color: var(--color-ink);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  .nav__dot {
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    flex: none;
+  }
+
+  .nav__list {
+    display: flex;
+    align-items: center;
+    gap: var(--space-md);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    margin-inline-start: auto;
+  }
+
+  .nav__list a {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .nav__list a:hover,
+  .nav__list a[aria-current='page'] {
+    color: var(--color-ink);
+  }
+  /* The accent marks the current destination — one job, one colour. */
+  .nav__list a[aria-current='page'] {
+    color: var(--color-accent-text);
+  }
+
+  .nav__end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3xs);
+  }
+
+  .nav__cta {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-paper);
+    background-color: var(--color-ink);
+    text-decoration: none;
+    white-space: nowrap;
+    padding-inline: var(--space-sm);
+    line-height: 2.25rem;
+    border-radius: 999px;
+    transition: background-color var(--dur-micro) var(--ease-out);
+  }
+  .nav__cta:hover {
+    background-color: var(--color-accent-text);
+  }
+
+  /* Below 40rem the destination list drops out and the pill keeps wordmark +
+   * contact + theme. The index page is itself the navigation on a phone. */
+  @media (max-width: 40rem) {
+    .nav__list {
+      display: none;
+    }
+    .nav__end {
+      margin-inline-start: auto;
+    }
+  }
+</style>

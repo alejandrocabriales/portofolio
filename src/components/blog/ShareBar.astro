@@ -1,0 +1,114 @@
+---
+/**
+ * Share affordances, ordered by how this blog actually gets distributed:
+ * LinkedIn first, then a copy-link button for everywhere else.
+ *
+ * The copy button reports success by *becoming* the confirmation for a moment
+ * rather than firing a toast — silent success, per the motion rules. It is a
+ * real `<button>` with a live region, so the state change is announced.
+ */
+import { SITE } from '@/config/site';
+
+interface Props {
+  title: string;
+  /** Absolute URL — share endpoints reject relative ones. */
+  url: string;
+}
+
+const { title, url } = Astro.props;
+
+const linkedIn = `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`;
+const mailto = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${title}\n\n${url}\n\n— via ${SITE.name}`)}`;
+---
+
+<div class="share">
+  <p class="share__label">Share</p>
+
+  <div class="share__actions">
+    <a class="share__link" href={linkedIn} target="_blank" rel="noopener noreferrer">LinkedIn</a>
+
+    <button class="share__link" type="button" data-copy-link data-url={url}>
+      <span data-copy-idle>Copy link</span>
+      <span data-copy-done hidden>Copied</span>
+    </button>
+
+    <a class="share__link" href={mailto}>Email</a>
+  </div>
+
+  <p class="sr-only" role="status" data-copy-status></p>
+</div>
+
+<style>
+  .share {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-md);
+    padding-block: var(--space-md);
+    border-block: var(--rule-hair) solid var(--color-rule);
+  }
+
+  .share__label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .share__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-md);
+  }
+
+  .share__link {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+    background: none;
+    border: 0;
+    padding: 0;
+    cursor: pointer;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .share__link:hover {
+    color: var(--color-accent-text);
+  }
+</style>
+
+<script>
+  document.addEventListener('click', async (event) => {
+    const target = event.target as HTMLElement | null;
+    const button = target?.closest<HTMLButtonElement>('[data-copy-link]');
+    if (!button) return;
+
+    const url = button.dataset['url'];
+    if (!url) return;
+
+    const idle = button.querySelector<HTMLElement>('[data-copy-idle]');
+    const done = button.querySelector<HTMLElement>('[data-copy-done]');
+    const status = document.querySelector<HTMLElement>('[data-copy-status]');
+
+    try {
+      await navigator.clipboard.writeText(url);
+    } catch {
+      // Clipboard blocked (insecure context, denied permission). Say so rather
+      // than showing a success state that didn't happen.
+      if (status) status.textContent = 'Copy failed — select the address bar instead.';
+      return;
+    }
+
+    idle?.setAttribute('hidden', '');
+    done?.removeAttribute('hidden');
+    if (status) status.textContent = 'Link copied to clipboard';
+
+    window.setTimeout(() => {
+      done?.setAttribute('hidden', '');
+      idle?.removeAttribute('hidden');
+      if (status) status.textContent = '';
+    }, 2000);
+  });
+</script>

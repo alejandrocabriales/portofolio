@@ -1,0 +1,107 @@
+---
+/**
+ * Ft4 · Dense colophon.
+ *
+ * Mono, tight, factual — a note about how the page was made rather than a
+ * sitemap. Deliberately not Ft3 (four link columns + social-icon row + tiny
+ * copyright), which is the standard AI footer and would be dishonest here: this
+ * site has no "Resources" or "Legal" section to catalogue.
+ *
+ * Social links render only when confirmed. `SOCIALS` types unverified profiles
+ * as `null`, so the previous build's bare `https://linkedin.com` hrefs cannot
+ * reappear.
+ */
+import { SITE, SOCIALS } from '@/config/site';
+
+interface SocialLink {
+  label: string;
+  href: string;
+}
+
+// Annotated (not `as const` / `satisfies`) so the literal `null`s widen to
+// `string | null` — otherwise the type guard below has nothing to narrow.
+const candidates: { label: string; href: string | null }[] = [
+  { label: 'GitHub', href: SOCIALS.github },
+  { label: 'LinkedIn', href: SOCIALS.linkedin },
+  { label: 'X', href: SOCIALS.x },
+];
+
+const links = candidates.filter((entry): entry is SocialLink => entry.href !== null);
+
+const year = new Date().getFullYear();
+---
+
+<footer class="colophon">
+  <div class="colophon__rule"></div>
+
+  <div class="colophon__body">
+    <p class="colophon__line">
+      <span>{SITE.name}</span>
+      <span aria-hidden="true">·</span>
+      <span>{SITE.location.city}, {SITE.location.country}</span>
+      <span aria-hidden="true">·</span>
+      <span>© {year}</span>
+    </p>
+
+    {
+      links.length > 0 && (
+        <p class="colophon__line">
+          {links.map((link) => (
+            <a href={link.href} target="_blank" rel="noopener noreferrer me">
+              {link.label}
+            </a>
+          ))}
+        </p>
+      )
+    }
+
+    <p class="colophon__line colophon__line--faint">
+      Built with Astro and Tailwind. Typeset in Space Grotesk, Newsreader and
+      JetBrains&nbsp;Mono.
+    </p>
+  </div>
+</footer>
+
+<style>
+  .colophon {
+    padding-block: var(--space-2xl) var(--space-xl);
+  }
+
+  .colophon__rule {
+    block-size: var(--rule-hair);
+    background-color: var(--color-ink);
+    margin-block-end: var(--space-md);
+  }
+
+  .colophon__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  .colophon__line {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    line-height: 1.6;
+    color: var(--color-muted);
+  }
+
+  .colophon__line--faint {
+    color: var(--color-faint);
+    max-inline-size: 46ch;
+  }
+
+  .colophon__line a {
+    color: var(--color-muted);
+    text-decoration: none;
+    text-underline-offset: 0.25em;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .colophon__line a:hover {
+    color: var(--color-accent-text);
+    text-decoration: underline;
+  }
+</style>

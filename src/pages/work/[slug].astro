@@ -1,0 +1,225 @@
+---
+import type { GetStaticPaths } from 'astro';
+
+import Layout from '@/layouts/Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+
+import { PROJECTS, type Project } from '@/data/projects';
+import { SITE } from '@/config/site';
+
+/** One case study per project. */
+export const getStaticPaths: GetStaticPaths = () =>
+  PROJECTS.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
+
+interface Props {
+  project: Project;
+}
+
+const { project } = Astro.props;
+
+const others = PROJECTS.filter((p) => p.slug !== project.slug).slice(0, 3);
+---
+
+<Layout
+  title={`${project.name} — ${project.context} — ${SITE.shortName}`}
+  description={project.summary}
+>
+  <Shell>
+    <main id="main">
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a href="/">Home</a>
+        <span aria-hidden="true">/</span>
+        <a href="/#work">Work</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">{project.name}</span>
+      </nav>
+
+      <article>
+        <header class="study">
+          <p class="study__context">{project.context} · {project.year}</p>
+          <h1 class="study__title">{project.name}</h1>
+          <p class="study__summary">{project.summary}</p>
+
+          {
+            project.impact && (
+              <p class="study__impact">
+                <span class="study__impact-mark" aria-hidden="true" />
+                {project.impact}
+              </p>
+            )
+          }
+        </header>
+
+        <div class="study__body">
+          <section class="block">
+            <h2>The problem</h2>
+            <p>{project.problem}</p>
+          </section>
+
+          <section class="block">
+            <h2>What I did</h2>
+            <p>{project.contribution}</p>
+          </section>
+
+          <section class="block">
+            <h2>Built with</h2>
+            <ul class="study__stack">
+              {project.stack.map((tool) => <li>{tool}</li>)}
+            </ul>
+          </section>
+
+          {
+            (project.url || project.repo) && (
+              <section class="block">
+                <h2>Links</h2>
+                <ul class="study__links">
+                  {project.url && (
+                    <li>
+                      <a href={project.url} target="_blank" rel="noopener noreferrer">
+                        Live site
+                      </a>
+                    </li>
+                  )}
+                  {project.repo && (
+                    <li>
+                      <a href={project.repo} target="_blank" rel="noopener noreferrer">
+                        Source
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </section>
+            )
+          }
+        </div>
+      </article>
+
+      <IndexSection label="Other work" id="other" action={{ label: 'All work →', href: '/#work' }}>
+        {
+          others.map((other) => (
+            <IndexRow
+              title={other.name}
+              subtitle={other.context}
+              description={other.summary}
+              meta={other.year}
+              href={`/work/${other.slug}/`}
+            />
+          ))
+        }
+      </IndexSection>
+    </main>
+  </Shell>
+</Layout>
+
+<style>
+  .crumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    padding-block-start: var(--space-xl);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-faint);
+  }
+  .crumb a {
+    color: var(--color-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .crumb a:hover {
+    color: var(--color-accent-text);
+  }
+
+  .study {
+    padding-block: var(--space-xl) var(--space-lg);
+  }
+
+  .study__context {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .study__title {
+    margin-block-start: var(--space-2xs);
+    font-size: var(--text-display-s);
+    letter-spacing: -0.03em;
+  }
+
+  .study__summary {
+    margin-block-start: var(--space-md);
+    max-inline-size: 58ch;
+    font-size: 1.125rem;
+    color: var(--color-muted);
+  }
+
+  .study__impact {
+    display: inline-flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    margin-block-start: var(--space-md);
+    padding: var(--space-2xs) var(--space-sm);
+    border: var(--rule-hair) solid var(--color-rule);
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-ink);
+  }
+
+  .study__impact-mark {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    flex: none;
+    background-color: var(--color-accent);
+  }
+
+  .study__body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-xl);
+    padding-block-start: var(--space-lg);
+    border-block-start: var(--rule-hair) solid var(--color-ink);
+  }
+
+  .block h2 {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .block p {
+    margin-block-start: var(--space-2xs);
+    max-inline-size: 64ch;
+    font-size: 1.0625rem;
+    line-height: 1.7;
+  }
+
+  .study__stack,
+  .study__links {
+    margin-block-start: var(--space-2xs);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-md);
+    list-style: none;
+    padding: 0;
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+
+  .study__links a {
+    color: var(--color-accent-text);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+</style>

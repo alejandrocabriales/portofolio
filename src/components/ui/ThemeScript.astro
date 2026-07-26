@@ -1,0 +1,29 @@
+---
+/**
+ * Resolves the colour theme before first paint.
+ *
+ * Must render inside `<head>`, above any styled markup. `is:inline` keeps Astro
+ * from bundling and deferring it — a deferred theme script paints the wrong
+ * theme first and corrects it after, which is the flash this replaces.
+ *
+ * The previous build ran this at the end of `<body>`, so every dark-mode
+ * visitor saw a white page flash on load.
+ */
+---
+
+<script is:inline>
+  (() => {
+    try {
+      const stored = localStorage.getItem('theme');
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      // An explicit choice always wins; the OS decides only when unset.
+      document.documentElement.classList.toggle('dark', stored === 'dark' || (!stored && prefersDark));
+    } catch {
+      // Private mode / storage disabled — fall back to the OS preference.
+      document.documentElement.classList.toggle(
+        'dark',
+        window.matchMedia('(prefers-color-scheme: dark)').matches,
+      );
+    }
+  })();
+</script>

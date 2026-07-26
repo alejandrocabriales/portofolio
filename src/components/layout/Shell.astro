@@ -1,0 +1,30 @@
+---
+/**
+ * The page container: measure, gutters, header and footer.
+ *
+ * Extracted so the index, the blog list and every post share one definition of
+ * "how wide is the page" — the previous build repeated container classes on each
+ * section, which is how measures drift apart.
+ *
+ * The `<main>` landmark stays in the page rather than here, so each route can
+ * label its own primary region.
+ */
+import Header from './Header.astro';
+import Footer from './Footer.astro';
+---
+
+<div class="shell">
+  <Header />
+  <slot />
+  <Footer />
+</div>
+
+<style>
+  .shell {
+    /* Narrow on purpose: the site is a reading surface, and an index stretched
+     * to 80rem makes the eye travel for no reason. */
+    max-inline-size: 46rem;
+    margin-inline: auto;
+    padding-inline: clamp(1rem, 4vw, 1.5rem);
+  }
+</style>

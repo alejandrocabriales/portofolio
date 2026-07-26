@@ -1,0 +1,207 @@
+---
+/**
+ * A project card.
+ *
+ * Two sizes — `lead` for the first project, `standard` for the rest — because a
+ * grid of three identical cards is the exact pattern that reads as generated.
+ * The size difference also does real work: the lead card has room for the
+ * measured outcome, which is the strongest thing on the page.
+ *
+ * The whole card is a link to the case study; the live-site link is a separate,
+ * nested affordance. Nested interactive elements need care, so the outer link
+ * is the card's `::after` overlay and the inner link sits above it — one
+ * accessible link each, no `<a>` inside `<a>`.
+ */
+import type { Project } from '@/data/projects';
+
+interface Props {
+  project: Project;
+  variant?: 'lead' | 'standard' | undefined;
+}
+
+const { project, variant = 'standard' } = Astro.props;
+---
+
+<article class:list={['card', `card--${variant}`]}>
+  <div class="card__head">
+    <h3 class="card__name">
+      <a href={`/work/${project.slug}/`} class="card__link">{project.name}</a>
+    </h3>
+    <span class="card__year">{project.year}</span>
+  </div>
+
+  <p class="card__context">{project.context}</p>
+  <p class="card__summary">{project.summary}</p>
+
+  {
+    project.impact && (
+      <p class="card__impact">
+        <span class="card__impact-mark" aria-hidden="true" />
+        {project.impact}
+      </p>
+    )
+  }
+
+  <p class="card__stack">
+    {project.stack.map((tool) => <span>{tool}</span>)}
+  </p>
+
+  {
+    project.url && (
+      <a class="card__external" href={project.url} target="_blank" rel="noopener noreferrer">
+        Visit live site
+        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+          <path d="M5 11 11 5M6 5h5v5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+    )
+  }
+</article>
+
+<style>
+  .card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding: var(--space-md);
+    border: var(--rule-hair) solid var(--color-rule);
+    border-radius: var(--radius-md);
+    background-color: var(--color-paper);
+    /* Only the properties that actually change — never `transition: all`. */
+    transition:
+      border-color var(--dur-short) var(--ease-out),
+      background-color var(--dur-short) var(--ease-out);
+  }
+
+  .card:hover {
+    border-color: var(--color-ink);
+    background-color: var(--color-paper-2);
+  }
+
+  /* One hairline at the top edge that takes the accent on hover. A single
+   * signal — no lift, no scale, no shadow. */
+  .card::before {
+    content: '';
+    position: absolute;
+    inset-block-start: -1px;
+    inset-inline: -1px;
+    block-size: 2px;
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    background-color: transparent;
+    transition: background-color var(--dur-short) var(--ease-out);
+  }
+  .card:hover::before {
+    background-color: var(--color-accent);
+  }
+
+  .card__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-sm);
+  }
+
+  .card__name {
+    font-size: 1.25rem;
+    font-weight: 500;
+    letter-spacing: -0.015em;
+  }
+
+  .card--lead .card__name {
+    font-size: 1.75rem;
+  }
+
+  .card__link {
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .card:hover .card__link {
+    color: var(--color-accent-text);
+  }
+
+  /* Stretches the case-study link across the whole card without nesting it. */
+  .card__link::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+  }
+
+  .card__year {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--color-faint);
+    white-space: nowrap;
+  }
+
+  .card__context {
+    margin-block-start: var(--space-3xs);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+  }
+
+  .card__summary {
+    margin-block-start: var(--space-sm);
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+
+  .card__impact {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2xs);
+    margin-block-start: var(--space-sm);
+    font-size: 0.9375rem;
+    color: var(--color-ink);
+  }
+
+  .card__impact-mark {
+    inline-size: 0.5rem;
+    block-size: 0.5rem;
+    flex: none;
+    background-color: var(--color-accent);
+    /* A small square, not an emoji or a stray icon-library glyph. */
+    translate: 0 -0.05rem;
+  }
+
+  .card__stack {
+    margin-block-start: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    color: var(--color-faint);
+  }
+
+  .card__external {
+    /* Pushed to the bottom so cards in a row align their footers. */
+    margin-block-start: auto;
+    padding-block-start: var(--space-md);
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-3xs);
+    align-self: flex-start;
+    /* Above the stretched overlay so it stays independently clickable. */
+    position: relative;
+    z-index: 1;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .card__external:hover {
+    color: var(--color-accent-text);
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .card__external svg {
+    inline-size: 0.75rem;
+    block-size: 0.75rem;
+  }
+</style>

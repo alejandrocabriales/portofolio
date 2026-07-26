@@ -1,0 +1,38 @@
+# Netlify response headers. Copied verbatim into `dist/` at build time.
+#
+# The site is fully static with no forms, no API routes and no third-party
+# origins, so the policy can be closed down to `'self'` almost everywhere —
+# every exception below is load-bearing and annotated.
+
+/*
+  # Defence in depth with `frame-ancestors` for browsers that predate CSP3.
+  X-Frame-Options: DENY
+
+  # Stops the browser guessing a Content-Type the server didn't send.
+  X-Content-Type-Options: nosniff
+
+  # Full URL to same-origin, bare origin cross-origin, nothing over plain HTTP.
+  Referrer-Policy: strict-origin-when-cross-origin
+
+  # Nothing here needs hardware. Deny the lot rather than enumerate.
+  Permissions-Policy: geolocation=(), camera=(), microphone=(), payment=(), usb=()
+
+  # One year, this host only. No `includeSubDomains` — *.netlify.app is shared.
+  Strict-Transport-Security: max-age=31536000
+
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self'; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'; upgrade-insecure-requests
+
+# CSP notes, in the order the directives appear:
+#
+# script-src 'unsafe-inline'   — ThemeScript.astro is `is:inline` by necessity:
+#                                it must run blocking, in <head>, before paint.
+#                                A nonce is impossible on a static host (no
+#                                per-request server), and a hash would silently
+#                                break the theme the next time that script is
+#                                edited. Inline scripts here are authored, not
+#                                user-supplied, and no route reflects input.
+# script-src 'wasm-unsafe-eval'— Pagefind's search runtime is WebAssembly.
+#                                Without this, /blog search fails to init.
+# style-src  'unsafe-inline'   — Astro inlines small scoped stylesheets
+#                                (`inlineStylesheets: 'auto'`, the default).
+# img-src    data:             — inline SVG data URIs in the compiled CSS.

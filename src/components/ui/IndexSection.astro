@@ -1,0 +1,82 @@
+---
+/**
+ * One categorised block of the index.
+ *
+ * The mono label IS the heading — not an eyebrow sitting above a separate
+ * display heading, and never a two-column tag-left/title-right head. On an
+ * Index-First page the category label is genuinely structural, so it carries
+ * the `<h2>` itself rather than decorating one.
+ */
+
+interface Props {
+  /** Section label. Rendered uppercase; write it in sentence case. */
+  label: string;
+  /** Anchor target, also used by the skip-link and any future nav. */
+  id: string;
+  /**
+   * Optional right-aligned affordance, e.g. "All posts →".
+   * `| undefined` is explicit because `strictest` enables
+   * `exactOptionalPropertyTypes`, so passing a possibly-undefined value to a
+   * bare `?:` prop is an error.
+   */
+  action?: { label: string; href: string } | undefined;
+}
+
+const { label, id, action } = Astro.props;
+---
+
+<section id={id} class="index-section">
+  <div class="index-section__head">
+    <h2 class="index-section__label">{label}</h2>
+    {
+      action && (
+        <a class="index-section__action" href={action.href}>
+          {action.label}
+        </a>
+      )
+    }
+  </div>
+  <slot />
+</section>
+
+<style>
+  .index-section {
+    /* Deliberately uneven: sections breathe more above than below, so each
+     * label reads as opening a block rather than floating between two. */
+    padding-block-start: var(--space-3xl);
+    padding-block-end: var(--space-lg);
+  }
+
+  .index-section__head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-md);
+    padding-block-end: var(--space-sm);
+    border-block-end: var(--rule-hair) solid var(--color-ink);
+  }
+
+  .index-section__label {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    line-height: 1;
+    color: var(--color-ink);
+  }
+
+  .index-section__action {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--color-muted);
+    text-decoration: none;
+    /* Never wraps to two lines — a broken-looking affordance reads as a bug. */
+    white-space: nowrap;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .index-section__action:hover {
+    color: var(--color-accent-text);
+  }
+</style>

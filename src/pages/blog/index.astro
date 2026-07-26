@@ -1,0 +1,115 @@
+---
+import Layout from '@/layouts/Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+import Search from '@/components/blog/Search.astro';
+
+import { getIndexedPosts, getTags, postPath, readingTime } from '@/lib/posts';
+import { formatDate } from '@/lib/format';
+import { SITE } from '@/config/site';
+
+const posts = await getIndexedPosts();
+const tags = await getTags();
+---
+
+<Layout
+  title={`Writing — ${SITE.shortName}`}
+  description="Notes on React, Next.js, Node, TypeScript, architecture and the LLM tooling I actually use in production."
+>
+  <Shell>
+    <main id="main">
+      <section class="intro">
+        <h1 class="intro__title">Writing</h1>
+        <p class="intro__lede">
+          Notes on what I'm learning as I build — React and Next.js internals, Node
+          and API design, architecture decisions I'd make differently now, and the
+          LLM tooling that has actually earned a place in my workflow.
+        </p>
+      </section>
+
+      {posts.length > 0 && <Search />}
+
+      {
+        tags.length > 0 && (
+          <nav class="tags" aria-label="Browse by tag">
+            {tags.map(({ tag, count }) => (
+              <a class="tags__tag" href={`/blog/tag/${tag}/`}>
+                #{tag} <span class="tags__count">{count}</span>
+              </a>
+            ))}
+          </nav>
+        )
+      }
+
+      <IndexSection label={`${posts.length} post${posts.length === 1 ? '' : 's'}`} id="posts">
+        {
+          posts.length === 0 ? (
+            <p class="empty">
+              Nothing published yet. The first posts are being written — check back
+              shortly, or subscribe via <a href="/rss.xml">RSS</a>.
+            </p>
+          ) : (
+            posts.map((post) => (
+              <IndexRow
+                title={post.data.title}
+                subtitle={post.data.featured ? `Featured · ${post.data.category}` : post.data.category}
+                description={post.data.description}
+                meta={`${formatDate(post.data.published)} · ${readingTime(post)} min`}
+                href={postPath(post)}
+              />
+            ))
+          )
+        }
+      </IndexSection>
+    </main>
+  </Shell>
+</Layout>
+
+<style>
+  .intro {
+    padding-block: var(--space-2xl) var(--space-lg);
+  }
+
+  .intro__title {
+    font-size: var(--text-display-s);
+  }
+
+  .intro__lede {
+    margin-block-start: var(--space-md);
+    max-inline-size: 62ch;
+    font-size: 1.0625rem;
+    color: var(--color-muted);
+  }
+
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .tags__tag {
+    color: var(--color-muted);
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .tags__tag:hover {
+    color: var(--color-accent-text);
+  }
+
+  .tags__count {
+    color: var(--color-faint);
+  }
+
+  .empty {
+    padding-block: var(--space-md);
+    max-inline-size: 52ch;
+    color: var(--color-muted);
+  }
+  .empty a {
+    color: var(--color-accent-text);
+  }
+</style>

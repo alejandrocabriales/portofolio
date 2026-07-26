@@ -1,0 +1,140 @@
+---
+/**
+ * A work-history entry with its outcomes exposed.
+ *
+ * Deliberately not `IndexRow`: the previous site rendered each role as a single
+ * generic sentence, which hid the only content a hiring manager is actually
+ * looking for. The highlight list is the point of this component — labels give
+ * the scan path, details carry the numbers.
+ */
+import type { Role } from '@/data/experience';
+
+interface Props {
+  role: Role;
+  /** Pre-formatted date range. */
+  meta: string;
+}
+
+const { role, meta } = Astro.props;
+---
+
+<article class="role">
+  <div class="role__head">
+    <div>
+      <h3 class="role__position">{role.position}</h3>
+      <p class="role__company">
+        {role.company} <span class="role__location">· {role.location}</span>
+      </p>
+    </div>
+    <time class="role__meta">{meta}</time>
+  </div>
+
+  <p class="role__summary">{role.summary}</p>
+
+  {
+    role.highlights.length > 0 && (
+      <dl class="role__highlights">
+        {role.highlights.map((highlight) => (
+          <div class="role__highlight">
+            <dt>{highlight.label}</dt>
+            <dd>{highlight.detail}</dd>
+          </div>
+        ))}
+      </dl>
+    )
+  }
+
+  <p class="role__stack">
+    {role.stack.map((tool) => <span>{tool}</span>)}
+  </p>
+</article>
+
+<style>
+  .role {
+    padding-block: var(--space-lg);
+    border-block-end: var(--rule-hair) solid var(--color-rule);
+  }
+
+  .role__head {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: baseline;
+    gap: var(--space-sm);
+  }
+
+  .role__position {
+    font-size: 1.125rem;
+    font-weight: 500;
+    letter-spacing: -0.01em;
+  }
+
+  .role__company {
+    margin-block-start: var(--space-3xs);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
+  }
+
+  .role__location {
+    color: var(--color-faint);
+  }
+
+  .role__meta {
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--color-faint);
+    white-space: nowrap;
+  }
+
+  .role__summary {
+    margin-block-start: var(--space-sm);
+    max-inline-size: 58ch;
+    color: var(--color-muted);
+  }
+
+  .role__highlights {
+    margin-block-start: var(--space-md);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-sm);
+  }
+
+  /* Label above detail, single column — a two-column label/detail grid at this
+   * width squeezes the detail into a gutter. */
+  .role__highlight dt {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-accent-text);
+  }
+
+  .role__highlight dd {
+    margin: 0;
+    margin-block-start: var(--space-3xs);
+    max-inline-size: 62ch;
+    color: var(--color-muted);
+    line-height: 1.6;
+  }
+
+  .role__stack {
+    margin-block-start: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-faint);
+  }
+
+  @media (max-width: 40rem) {
+    .role__head {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-3xs);
+    }
+    .role__meta {
+      order: -1;
+    }
+  }
+</style>

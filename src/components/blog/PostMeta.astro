@@ -1,0 +1,51 @@
+---
+/**
+ * The mono metadata line under a post title: date, reading time, category.
+ *
+ * `<time datetime>` gives the machine-readable date that JSON-LD and feed
+ * readers need; the visible text stays human. Tabular figures come from the base
+ * layer, so dates in a list align in a column.
+ */
+import { readingTime, type Post } from '@/lib/posts';
+import { formatDate } from '@/lib/format';
+
+interface Props {
+  post: Post;
+  /** Adds the "Updated" clause. Used on the post page, not in lists. */
+  showUpdated?: boolean | undefined;
+}
+
+const { post, showUpdated = false } = Astro.props;
+const minutes = readingTime(post);
+const updated = post.data.updated;
+---
+
+<p class="meta">
+  <time datetime={post.data.published.toISOString()}>{formatDate(post.data.published)}</time>
+  <span aria-hidden="true">·</span>
+  <span>{minutes} min read</span>
+  <span aria-hidden="true">·</span>
+  <span>{post.data.category}</span>
+  {
+    showUpdated && updated && (
+      <>
+        <span aria-hidden="true">·</span>
+        <span>
+          Updated <time datetime={updated.toISOString()}>{formatDate(updated)}</time>
+        </span>
+      </>
+    )
+  }
+</p>
+
+<style>
+  .meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-3xs) var(--space-2xs);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    letter-spacing: 0.01em;
+    color: var(--color-faint);
+  }
+</style>

@@ -1,0 +1,101 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+import Layout from './Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import PostMeta from '@/components/blog/PostMeta.astro';
+import TableOfContents from '@/components/blog/TableOfContents.astro';
+import ShareBar from '@/components/blog/ShareBar.astro';
+import PostNav from '@/components/blog/PostNav.astro';
+import RelatedPosts from '@/components/blog/RelatedPosts.astro';
+import ReadingProgress from '@/components/blog/ReadingProgress.astro';
+
+import { getSiblings, getRelated, type Post } from '@/lib/posts';
+import '@/styles/prose.css';
+
+interface Props {
+  post: Post;
+  headings: MarkdownHeading[];
+}
+
+const { post, headings } = Astro.props;
+const { prev, next } = await getSiblings(post);
+const related = await getRelated(post);
+
+const url = new URL(Astro.url.pathname, Astro.site).href;
+---
+
+<Layout title={post.data.title} description={post.data.description}>
+  <ReadingProgress />
+
+  <Shell>
+    <main id="main">
+      <!-- `data-pagefind-body` scopes the search index to article content, so
+        the nav, footer and metadata don't pollute every result's excerpt. -->
+      <article data-pagefind-body>
+        <header class="post-header">
+          <PostMeta post={post} showUpdated />
+          <h1 class="post-header__title" data-pagefind-meta="title">{post.data.title}</h1>
+          <p class="post-header__description">{post.data.description}</p>
+
+          {
+            post.data.tags.length > 0 && (
+              <p class="post-header__tags">
+                {post.data.tags.map((tag) => (
+                  <a href={`/blog/tag/${tag}/`}>#{tag}</a>
+                ))}
+              </p>
+            )
+          }
+        </header>
+
+        <TableOfContents headings={headings} />
+
+        <div class="prose">
+          <slot />
+        </div>
+      </article>
+
+      <ShareBar title={post.data.title} url={url} />
+      <RelatedPosts posts={related} />
+      <PostNav prev={prev} next={next} />
+    </main>
+  </Shell>
+</Layout>
+
+<style>
+  .post-header {
+    padding-block: var(--space-2xl) var(--space-lg);
+  }
+
+  .post-header__title {
+    margin-block-start: var(--space-2xs);
+    font-size: var(--text-display-s);
+    max-inline-size: 24ch;
+  }
+
+  .post-header__description {
+    margin-block-start: var(--space-md);
+    max-inline-size: 60ch;
+    font-size: 1.125rem;
+    color: var(--color-muted);
+  }
+
+  .post-header__tags {
+    margin-block-start: var(--space-md);
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs) var(--space-sm);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+  }
+
+  .post-header__tags a {
+    color: var(--color-faint);
+    text-decoration: none;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .post-header__tags a:hover {
+    color: var(--color-accent-text);
+  }
+</style>

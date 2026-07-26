@@ -1,0 +1,33 @@
+---
+/**
+ * Related posts. Reuses `IndexRow` so a post row looks identical wherever it
+ * appears — index, blog list, tag archive, related block.
+ *
+ * Renders nothing when `getRelated` found no genuine matches. A "related"
+ * section padded with unrelated posts teaches readers to skip it.
+ */
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+import { postPath, readingTime, type Post } from '@/lib/posts';
+
+interface Props {
+  posts: Post[];
+}
+
+const { posts } = Astro.props;
+---
+
+{
+  posts.length > 0 && (
+    <IndexSection label="Related reading" id="related">
+      {posts.map((post) => (
+        <IndexRow
+          title={post.data.title}
+          description={post.data.description}
+          meta={`${readingTime(post)} min`}
+          href={postPath(post)}
+        />
+      ))}
+    </IndexSection>
+  )
+}

@@ -1,0 +1,58 @@
+---
+/**
+ * Reading progress bar.
+ *
+ * Pure CSS scroll-driven animation — no scroll listener, no JS, no layout
+ * thrash. Where `animation-timeline` is unsupported the bar is hidden entirely
+ * rather than shown frozen at zero, which would read as broken.
+ */
+---
+
+<div class="progress" aria-hidden="true">
+  <div class="progress__bar"></div>
+</div>
+
+<style>
+  .progress {
+    display: none;
+  }
+
+  @supports (animation-timeline: scroll()) {
+    .progress {
+      display: block;
+      position: fixed;
+      inset-block-start: 0;
+      inset-inline: 0;
+      block-size: 2px;
+      z-index: 40;
+      /* The track stays invisible; only the filled portion reads. */
+      background: transparent;
+      pointer-events: none;
+    }
+
+    .progress__bar {
+      block-size: 100%;
+      background-color: var(--color-accent);
+      transform-origin: 0 50%;
+      animation: progress linear both;
+      animation-timeline: scroll(root block);
+    }
+
+    @keyframes progress {
+      from {
+        transform: scaleX(0);
+      }
+      to {
+        transform: scaleX(1);
+      }
+    }
+  }
+
+  /* Scroll-linked motion is exactly what vestibular-sensitive readers ask to
+   * stop, and the bar carries no information they can't get from the scrollbar. */
+  @media (prefers-reduced-motion: reduce) {
+    .progress {
+      display: none;
+    }
+  }
+</style>

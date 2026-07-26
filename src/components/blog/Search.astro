@@ -1,0 +1,198 @@
+---
+/**
+ * Post search.
+ *
+ * Pagefind builds a static, chunked index at build time and the runtime is
+ * fetched only on first interaction — so the page ships zero search JavaScript
+ * until someone actually types. No search server, no client-side index of every
+ * post in the initial payload.
+ *
+ * Degrades honestly: the index only exists in a built site, so during `astro
+ * dev` the input reports that search needs a production build rather than
+ * silently returning nothing.
+ */
+---
+
+<div class="search">
+  <label class="search__label" for="post-search">Search posts</label>
+  <input
+    id="post-search"
+    class="search__input"
+    type="search"
+    placeholder="Type to search…"
+    autocomplete="off"
+    data-search-input
+  />
+
+  <p class="search__status" role="status" data-search-status></p>
+  <ol class="search__results" data-search-results></ol>
+</div>
+
+<style>
+  .search {
+    padding-block: var(--space-lg) 0;
+  }
+
+  .search__label {
+    display: block;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .search__input {
+    inline-size: 100%;
+    padding: var(--space-2xs) var(--space-xs);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    color: var(--color-ink);
+    background-color: var(--color-paper-2);
+    border: var(--rule-hair) solid var(--color-rule);
+    border-radius: var(--radius-md);
+    /* 44px target on touch. */
+    min-block-size: 2.75rem;
+  }
+  .search__input:hover {
+    border-color: var(--color-faint);
+  }
+
+  .search__status {
+    margin-block-start: var(--space-2xs);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-faint);
+  }
+  .search__status:empty {
+    display: none;
+  }
+
+  .search__results {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .search__results:empty {
+    display: none;
+  }
+
+  .search__results li {
+    padding-block: var(--space-sm);
+    border-block-end: var(--rule-hair) solid var(--color-rule);
+  }
+
+  .search__results a {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 500;
+    color: var(--color-ink);
+    text-decoration: none;
+  }
+  .search__results a:hover {
+    color: var(--color-accent-text);
+  }
+
+  .search__excerpt {
+    margin-block-start: var(--space-3xs);
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+  }
+  /* Pagefind wraps matched terms in <mark>. */
+  .search__excerpt :global(mark) {
+    background-color: transparent;
+    color: var(--color-accent-text);
+    font-weight: 600;
+  }
+</style>
+
+<script>
+  interface PagefindResultData {
+    url: string;
+    meta: { title?: string };
+    excerpt: string;
+  }
+  interface PagefindModule {
+    init(): Promise<void>;
+    search(query: string): Promise<{ results: { data(): Promise<PagefindResultData> }[] }>;
+  }
+
+  const input = document.querySelector<HTMLInputElement>('[data-search-input]');
+  const list = document.querySelector<HTMLElement>('[data-search-results]');
+  const status = document.querySelector<HTMLElement>('[data-search-status]');
+
+  if (input && list && status) {
+    // Non-null aliases: TypeScript does not carry the narrowing above into the
+    // closures below, and widening the config to hide that would be worse.
+    const statusNode: HTMLElement = status;
+    const listNode: HTMLElement = list;
+    const inputNode: HTMLInputElement = input;
+
+    // Built by `pagefind --site dist` *after* the Astro build, so this path does
+    // not exist at compile time. Held in a variable so neither Vite nor
+    // TypeScript tries to resolve it statically.
+    const PAGEFIND_PATH = '/pagefind/pagefind.js';
+
+    let pagefind: PagefindModule | null = null;
+    let loadFailed = false;
+
+    async function load(): Promise<PagefindModule | null> {
+      if (pagefind || loadFailed) return pagefind;
+      try {
+        const mod: unknown = await import(/* @vite-ignore */ PAGEFIND_PATH);
+        pagefind = mod as PagefindModule;
+        await pagefind.init();
+      } catch {
+        loadFailed = true;
+        statusNode.textContent = 'Search index unavailable — run a production build.';
+      }
+      return pagefind;
+    }
+
+    // Warm the runtime on first focus so the first keystroke feels instant.
+    inputNode.addEventListener('focus', () => void load(), { once: true });
+
+    let timer: number | undefined;
+    inputNode.addEventListener('input', () => {
+      window.clearTimeout(timer);
+      const query = inputNode.value.trim();
+
+      if (query.length < 2) {
+        listNode.replaceChildren();
+        statusNode.textContent = '';
+        return;
+      }
+
+      // Debounced: one search per settled query, not one per keystroke.
+      timer = window.setTimeout(async () => {
+        const engine = await load();
+        if (!engine) return;
+
+        const search = await engine.search(query);
+        const results = await Promise.all(search.results.slice(0, 8).map((r) => r.data()));
+
+        listNode.replaceChildren();
+        statusNode.textContent =
+          results.length === 0
+            ? `No posts match “${query}”.`
+            : `${results.length} result${results.length === 1 ? '' : 's'}`;
+
+        for (const result of results) {
+          const li = document.createElement('li');
+          const link = document.createElement('a');
+          link.href = result.url;
+          link.textContent = result.meta.title ?? result.url;
+
+          const excerpt = document.createElement('p');
+          excerpt.className = 'search__excerpt';
+          // Pagefind returns sanitised HTML containing only <mark>.
+          excerpt.innerHTML = result.excerpt;
+
+          li.append(link, excerpt);
+          listNode.append(li);
+        }
+      }, 180);
+    });
+  }
+</script>

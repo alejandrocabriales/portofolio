@@ -1,0 +1,152 @@
+---
+/**
+ * Marquee-hero masthead: one large statement, then a mono metadata rail.
+ *
+ * The previous version was deliberately quiet, which read as underconfident for
+ * a portfolio whose job is to make a claim before it lists evidence. This gives
+ * the headline real display size and moves the supporting facts into a rail —
+ * so the page opens with one idea, not a paragraph.
+ *
+ * Every fact is sourced: role and location from `SITE`, years from the CV,
+ * focus from the actual stack. No invented metrics.
+ */
+import { SITE, AVAILABILITY } from '@/config/site';
+import { EDUCATION, LANGUAGES } from '@/data/experience';
+
+const utcOffset = new Intl.DateTimeFormat('en', {
+  timeZone: SITE.timeZone,
+  timeZoneName: 'shortOffset',
+})
+  .formatToParts(new Date())
+  .find((part) => part.type === 'timeZoneName')?.value;
+
+/**
+ * Six facts, derived from the existing data rather than restated — changing a
+ * language or the degree updates the rail automatically.
+ *
+ * The timezone entry names the US overlap explicitly: for a remote hire that is
+ * a selling point, and it was nowhere on the previous site.
+ */
+const rail = [
+  { label: 'Experience', value: `${SITE.yearsExperience} years` },
+  { label: 'Based', value: `${SITE.location.city}, ${SITE.location.country}` },
+  { label: 'Hours', value: `${utcOffset} · US overlap` },
+  // Names a backend technology explicitly: "systems" is a wider claim than
+  // "interfaces" but a vaguer one, so the rail has to carry the specificity the
+  // headline gave up — and prove the full-stack claim rather than assert it.
+  { label: 'Focus', value: 'React · Next.js · Node · Postgres' },
+  { label: 'Degree', value: EDUCATION.degree },
+  { label: 'Languages', value: LANGUAGES.map((l) => l.name).join(' · ') },
+];
+---
+
+<section class="masthead" aria-labelledby="masthead-title">
+  {
+    AVAILABILITY.open && (
+      <p class="status">
+        <span class="status__dot" aria-hidden="true" />
+        {AVAILABILITY.label}
+      </p>
+    )
+  }
+
+  <h1 id="masthead-title" class="masthead__title">Systems that hold up in production.</h1>
+
+  <p class="masthead__role">{SITE.role}</p>
+
+  <dl class="rail">
+    {
+      rail.map((item) => (
+        <div class="rail__item">
+          <dt>{item.label}</dt>
+          <dd>{item.value}</dd>
+        </div>
+      ))
+    }
+  </dl>
+</section>
+
+<style>
+  .masthead {
+    padding-block: var(--space-2xl) var(--space-lg);
+  }
+
+  .status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2xs);
+    padding: var(--space-3xs) var(--space-xs);
+    border: var(--rule-hair) solid var(--color-rule);
+    border-radius: 999px;
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-muted);
+  }
+
+  .status__dot {
+    inline-size: 0.375rem;
+    block-size: 0.375rem;
+    border-radius: 50%;
+    background-color: var(--color-accent);
+    flex: none;
+  }
+
+  .masthead__title {
+    margin-block-start: var(--space-md);
+    font-size: var(--text-display);
+    font-weight: 600;
+    letter-spacing: -0.035em;
+    line-height: 0.95;
+    /* Breaks where the meaning breaks rather than wherever the box ends. */
+    max-inline-size: 13ch;
+  }
+
+  .masthead__role {
+    margin-block-start: var(--space-md);
+    font-family: var(--font-mono);
+    font-size: 0.875rem;
+    letter-spacing: 0.02em;
+    color: var(--color-muted);
+  }
+
+  .rail {
+    margin-block-start: var(--space-xl);
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    /* Row gap larger than column gap: the two rows must read as two rows, not
+     * as a six-cell block. */
+    gap: var(--space-md) var(--space-md);
+    padding-block-start: var(--space-sm);
+    border-block-start: var(--rule-hair) solid var(--color-ink);
+  }
+
+  .rail__item dt {
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .rail__item dd {
+    margin: 0;
+    margin-block-start: var(--space-3xs);
+    font-family: var(--font-mono);
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums lining-nums;
+    color: var(--color-ink);
+  }
+
+  @media (max-width: 40rem) {
+    .masthead__title {
+      max-inline-size: none;
+    }
+    /* Two up rather than one — three stacked rows turn the rail into a list. */
+    .rail {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-sm) var(--space-md);
+    }
+  }
+</style>

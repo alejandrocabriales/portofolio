@@ -1,0 +1,133 @@
+---
+import type { MarkdownHeading } from 'astro';
+
+/**
+ * Table of contents built from the rendered headings Astro already gives us —
+ * no second parse of the markdown, no client-side DOM scraping.
+ *
+ * Only h2/h3 appear: h1 is the post title, and h4+ produces a list too deep to
+ * scan. Renders nothing at all below three headings, where a TOC is just noise.
+ *
+ * The active-section highlight is the one piece of JS here. It uses
+ * IntersectionObserver (never a scroll listener) and degrades to a plain,
+ * fully-usable anchor list if the script never runs.
+ */
+interface Props {
+  headings: MarkdownHeading[];
+}
+
+const { headings } = Astro.props;
+
+const items = headings.filter((h) => h.depth === 2 || h.depth === 3);
+const show = items.length >= 3;
+---
+
+{
+  show && (
+    <nav class="toc" aria-labelledby="toc-heading">
+      <h2 id="toc-heading" class="toc__label">
+        On this page
+      </h2>
+      <ol class="toc__list">
+        {items.map((heading) => (
+          <li class:list={['toc__item', { 'toc__item--nested': heading.depth === 3 }]}>
+            <a href={`#${heading.slug}`} data-toc-link={heading.slug}>
+              {heading.text}
+            </a>
+          </li>
+        ))}
+      </ol>
+    </nav>
+  )
+}
+
+<style>
+  .toc {
+    margin-block: var(--space-lg);
+    padding-inline-start: var(--space-md);
+    border-inline-start: var(--rule-hair) solid var(--color-rule);
+  }
+
+  .toc__label {
+    font-family: var(--font-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+    margin-block-end: var(--space-2xs);
+  }
+
+  .toc__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3xs);
+  }
+
+  .toc__item--nested {
+    padding-inline-start: var(--space-md);
+  }
+
+  .toc a {
+    font-size: 0.9375rem;
+    color: var(--color-muted);
+    text-decoration: none;
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+  .toc a:hover {
+    color: var(--color-ink);
+  }
+
+  /* Set by the observer below. Colour only — moving the item would shift the
+   * list under the reader's eye while they scroll. */
+  .toc a[aria-current='true'] {
+    color: var(--color-accent-text);
+  }
+</style>
+
+<script>
+  const links = document.querySelectorAll<HTMLAnchorElement>('[data-toc-link]');
+  if (links.length > 0) {
+    const bySlug = new Map<string, HTMLAnchorElement>();
+    for (const link of links) {
+      const slug = link.dataset['tocLink'];
+      if (slug) bySlug.set(slug, link);
+    }
+
+    const visible = new Set<string>();
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        for (const entry of entries) {
+          if (entry.isIntersecting) visible.add(entry.target.id);
+          else visible.delete(entry.target.id);
+        }
+
+        // Highlight the topmost heading currently on screen; keep the previous
+        // one when nothing is visible (e.g. mid-way through a long section).
+        let current: string | null = null;
+        for (const slug of bySlug.keys()) {
+          if (visible.has(slug)) {
+            current = slug;
+            break;
+          }
+        }
+        if (!current) return;
+
+        for (const [slug, link] of bySlug) {
+          if (slug === current) link.setAttribute('aria-current', 'true');
+          else link.removeAttribute('aria-current');
+        }
+      },
+      { rootMargin: '-80px 0px -70% 0px' },
+    );
+
+    for (const slug of bySlug.keys()) {
+      const heading = document.getElementById(slug);
+      if (heading) observer.observe(heading);
+    }
+  }
+</script>

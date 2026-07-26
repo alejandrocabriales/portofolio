@@ -1,0 +1,88 @@
+---
+import type { GetStaticPaths } from 'astro';
+
+import Layout from '@/layouts/Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+
+import { getPublishedPosts, postPath, readingTime, type Post } from '@/lib/posts';
+import { formatDate } from '@/lib/format';
+import { SITE } from '@/config/site';
+
+/** One archive page per tag that actually has posts — no empty archives. */
+export const getStaticPaths: GetStaticPaths = async () => {
+  const posts = await getPublishedPosts();
+  const byTag = new Map<string, Post[]>();
+
+  for (const post of posts) {
+    for (const tag of post.data.tags) {
+      byTag.set(tag, [...(byTag.get(tag) ?? []), post]);
+    }
+  }
+
+  return [...byTag.entries()].map(([tag, tagged]) => ({
+    params: { tag },
+    props: { tag, posts: tagged },
+  }));
+};
+
+interface Props {
+  tag: string;
+  posts: Post[];
+}
+
+const { tag, posts } = Astro.props;
+---
+
+<Layout
+  title={`#${tag} — Writing — ${SITE.shortName}`}
+  description={`Posts tagged ${tag} by ${SITE.name}.`}
+>
+  <Shell>
+    <main id="main">
+      <nav class="crumb" aria-label="Breadcrumb">
+        <a href="/blog/">Writing</a>
+        <span aria-hidden="true">/</span>
+        <span aria-current="page">#{tag}</span>
+      </nav>
+
+      <IndexSection
+        label={`${posts.length} post${posts.length === 1 ? '' : 's'} tagged ${tag}`}
+        id="posts"
+        action={{ label: 'All posts →', href: '/blog/' }}
+      >
+        {
+          posts.map((post) => (
+            <IndexRow
+              title={post.data.title}
+              subtitle={post.data.category}
+              description={post.data.description}
+              meta={`${formatDate(post.data.published)} · ${readingTime(post)} min`}
+              href={postPath(post)}
+            />
+          ))
+        }
+      </IndexSection>
+    </main>
+  </Shell>
+</Layout>
+
+<style>
+  .crumb {
+    display: flex;
+    gap: var(--space-2xs);
+    padding-block-start: var(--space-2xl);
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    color: var(--color-faint);
+  }
+  .crumb a {
+    color: var(--color-muted);
+    text-decoration: none;
+    white-space: nowrap;
+  }
+  .crumb a:hover {
+    color: var(--color-accent-text);
+  }
+</style>
