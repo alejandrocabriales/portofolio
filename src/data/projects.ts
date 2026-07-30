@@ -33,14 +33,41 @@ export const PROJECTS: Project[] = [
     name: 'Fusion',
     context: 'Sky (formerly MakerDAO)',
     year: '2023',
-    summary: 'Asset and investment management platform with real-time financial dashboards.',
+    summary:
+      'Business-intelligence dashboard for the Sky ecosystem — finances, governance and contributors in one view.',
     problem:
-      'Financial dashboards read from external APIs that are slow and occasionally unreliable. Rendering had to stay fast without showing users stale or half-loaded numbers.',
+      'The numbers that describe Sky lived in three unrelated places: budgets and spend reported per core unit, executive votes recorded on-chain, and contributor status tracked by hand. Answering a basic question about the ecosystem meant assembling it yourself. The financial views also read from external APIs slow enough that naive rendering felt broken.',
     contribution:
-      'Led the frontend architecture on Next.js App Router — deciding what rendered on the server versus the client, and implementing the SWR revalidation and caching layer that absorbs upstream latency.',
+      'Led the frontend architecture on Next.js App Router — deciding what rendered on the server versus the client, and implementing the SWR revalidation and caching layer that absorbs upstream latency. Built the finance breakdown (revenue, protocol and operating costs across Governance, Stability, Outreach and the other core units), the executive-proposal tracker with vote and execution dates plus MKR support, and the directory of ecosystem actors with their current status.',
     impact: 'First Contentful Paint improved by 40%.',
     stack: ['Next.js', 'React', 'TypeScript', 'WebSockets', 'SWR', 'Material UI'],
-    url: 'https://fusion.sky.money/',
+    url: 'https://fusion-nine-eta.vercel.app/',
+    repo: null,
+    featured: true,
+  },
+  {
+    slug: 'achra',
+    name: 'Achra',
+    context: 'DSpot',
+    year: '2026',
+    summary:
+      'Marketplace and operations layer for global coordination — organisations post roadmaps, builder teams bid on them, operators run the back office.',
+    problem:
+      'Distributed organisations can find teams, but they cannot run them. Scope lives in one tool, approvals in another, and payment in a third — and once the parties sit in different countries, invoicing, tax reporting and compliance become the reason work stops. The product had to make one flow out of RFP, proposal, delivery and payment, and keep every decision along it auditable.',
+    contribution:
+      'Built the three-sided product surface — organisation roadmaps and structured proposals, project discovery for builders, and the operator service catalogue — on Next.js and TypeScript. Implemented the operational hub (invoicing, milestone payouts, reporting, 1099/W-9 tax paperwork), the governance layer that encodes rules, permissions and approvals as a traceable record, and the stablecoin milestone-payment flow against Node and Postgres services. Structured the data and workflow models so AI agents participate as first-class actors rather than bolted-on automation.',
+    impact: null,
+    stack: [
+      'Next.js',
+      'React',
+      'TypeScript',
+      'Tailwind CSS',
+      'viem',
+      'wagmi',
+      'Node.js',
+      'PostgreSQL',
+    ],
+    url: 'https://achra.com/',
     repo: null,
     featured: true,
   },

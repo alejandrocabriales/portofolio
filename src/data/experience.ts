@@ -32,9 +32,9 @@ export const EXPERIENCE: Role[] = [
       'Frontend architecture for financial products, plus the design system and internal tooling the rest of the team builds on.',
     highlights: [
       {
-        label: 'Investment platform (Fusion)',
+        label: 'Ecosystem dashboard (Fusion)',
         detail:
-          'Led frontend architecture on Next.js App Router. Tuned the SSR/client rendering split and improved First Contentful Paint by 40%.',
+          'Led frontend architecture on Next.js App Router for Sky’s finance, governance and contributor dashboards. Tuned the SSR/client rendering split and improved First Contentful Paint by 40%.',
       },
       {
         label: 'Design system',
