@@ -1,5 +1,6 @@
 /**
- * Work history, newest first. Source of truth: CV (CV-Manuel-FullStack.pdf).
+ * Work history, newest first. Source of truth: CV
+ * (Manuel Alejandro Cabriales Toledo.pdf, November 2026).
  *
  * `highlights` carry outcomes, not tool lists — every figure here comes from the
  * CV verbatim. Nothing is estimated or rounded up. If a bullet has no number, it
@@ -15,6 +16,11 @@ export interface Role {
   /** ISO dates. `end: null` means current. */
   start: string;
   end: string | null;
+  /**
+   * Own work rather than employment. Kept out of the Person node's `worksFor`,
+   * which would otherwise name "Independent" as an employer.
+   */
+  independent?: boolean | undefined;
   summary: string;
   highlights: { label: string; detail: string }[];
   stack: string[];
@@ -22,12 +28,36 @@ export interface Role {
 
 export const EXPERIENCE: Role[] = [
   {
+    company: 'Independent project',
+    url: null,
+    position: 'AI Engineer',
+    location: 'Montevideo, Uruguay — Remote',
+    start: '2026-10',
+    end: null,
+    independent: true,
+    summary:
+      'A production AI customer-service agent for a spa business in Spain, answering customers on WhatsApp and Instagram.',
+    highlights: [
+      {
+        label: 'WhatsApp booking agent',
+        detail:
+          'Built the agent in Node.js, routing conversations through OpenRouter to Claude and OpenAI models, with tools behind validated schemas so the model asks and the code decides.',
+      },
+      {
+        label: 'End-to-end automation',
+        detail:
+          'Automated appointment scheduling, inquiries and order classification end to end, replacing manual front-desk triage.',
+      },
+    ],
+    stack: ['Node.js', 'TypeScript', 'OpenRouter', 'Claude', 'OpenAI', 'WhatsApp Business API', 'Cloudflare Workers'],
+  },
+  {
     company: 'DSpot',
     url: null,
     position: 'Senior Full Stack Engineer',
     location: 'Montevideo, Uruguay — Remote',
     start: '2021-12',
-    end: null,
+    end: '2026-10',
     summary:
       'Frontend architecture for financial products, plus the design system and internal tooling the rest of the team builds on.',
     highlights: [
@@ -124,6 +154,6 @@ export const LANGUAGES = [
   { name: 'Spanish', level: 'Native' },
   {
     name: 'English',
-    level: 'Professional working proficiency — technical and business communication',
+    level: 'Professional working proficiency (B2) — daily technical and business communication on international teams',
   },
 ] as const;

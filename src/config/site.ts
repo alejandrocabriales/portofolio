@@ -16,11 +16,11 @@ export const SITE = {
   name: 'Manuel Cabriales Toledo',
   /** Used where the full name does not fit: nav wordmark, OG author byline. */
   shortName: 'Manuel Cabriales',
-  role: 'Senior Full Stack Engineer',
+  role: 'Senior Full Stack & AI Engineer',
 
   /** Default <meta description>. Pages override; the blog derives per-post. */
   description:
-    'Senior full stack engineer building production React, Next.js and Node applications. Based in Montevideo, Uruguay.',
+    'Senior full stack engineer building production React, Next.js and Node applications, and production AI agents on Claude and OpenAI. Based in Montevideo, Uruguay.',
 
   locale: 'en',
   /**
@@ -64,7 +64,7 @@ export const SITE = {
     path: '/og/default.png',
     width: 1200,
     height: 675,
-    alt: 'Manuel Cabriales Toledo — Senior Full Stack Engineer',
+    alt: 'Manuel Cabriales Toledo — Senior Full Stack & AI Engineer',
   },
 
   /**
