@@ -36,3 +36,10 @@ public/pagefind/
 # editors
 .idea/
 *.code-workspace
+
+# impeccable — per-developer settings stay local
+.impeccable/config.local.json
+.impeccable/hook.cache.json
+# impeccable engine binaries — the launcher downloads them on first run
+.agents/skills/impeccable/scripts/bin/
+.claude/skills/impeccable/scripts/bin/

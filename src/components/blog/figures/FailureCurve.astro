@@ -1,0 +1,76 @@
+---
+/**
+ * Cumulative failures logged in the risk map, by the day each entry was added.
+ * Day offsets count from 27 Oct 2026, the first documented incident.
+ */
+import Figure from './Figure.astro';
+
+const points: [label: string, day: number, total: number][] = [
+  ['27 Oct', 0, 12],
+  ['29 Oct', 2, 22],
+  ['30 Oct', 3, 29],
+  ['31 Oct', 4, 34],
+  ['2 Nov', 6, 42],
+  ['3 Nov', 7, 55],
+  ['4 Nov', 8, 60],
+  ['5 Nov', 9, 65],
+  ['6 Nov', 10, 89],
+  ['7 Nov', 11, 99],
+  ['8 Nov', 12, 107],
+  ['9 Nov', 13, 111],
+];
+
+const W = 640;
+const H = 260;
+const left = 34;
+const right = 30;
+const top = 20;
+const bottom = 34;
+const maxY = 120;
+const days = 13;
+const launchDay = 2;
+
+const x = (d: number) => left + ((W - left - right) * d) / days;
+const y = (v: number) => top + (H - top - bottom) * (1 - v / maxY);
+
+const line = points.map(([, d, v], i) => `${i ? 'L' : 'M'}${x(d).toFixed(1)},${y(v).toFixed(1)}`).join(' ');
+const first = points[0]!;
+const last = points.at(-1)!;
+const area = `${line} L${x(last[1])},${y(0)} L${x(first[1])},${y(0)} Z`;
+const ticks = [0, 30, 60, 90, 120];
+---
+
+<Figure
+  title="Failures logged, cumulative"
+  subtitle="The slope steepens right after launch: real traffic finds what development did not."
+  source="Source: project risk map, dated by the day each entry was logged."
+>
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-label="Cumulative failures logged: 12 on 27 October, 111 on 9 November.">
+    {
+      ticks.map((t) => (
+        <>
+          <line class="c-grid" x1={left} x2={W - right} y1={y(t)} y2={y(t)} />
+          <text class="c-label" x={left - 6} y={y(t) + 4} text-anchor="end">{t}</text>
+        </>
+      ))
+    }
+    <path class="c-area" d={area} />
+    <line class="c-mark" x1={x(launchDay)} x2={x(launchDay)} y1={top} y2={y(0)} />
+    <text class="c-label c-strong" x={x(launchDay) + 6} y={top + 10}>launch</text>
+    <path class="c-line" d={line} />
+    {
+      points.map(([label, d, v], i) => (
+        <>
+          <circle class="c-dot" cx={x(d)} cy={y(v)} r={i === points.length - 1 ? 4.5 : 2.5}>
+            <title>{`${label}: ${v}`}</title>
+          </circle>
+          {i % 2 === 0 && (
+            <text class="c-label" x={x(d)} y={H - 12} text-anchor="middle">{label}</text>
+          )}
+        </>
+      ))
+    }
+    <text class="c-label" x={x(10) - 8} y={y(89) - 8} text-anchor="end">+24 on 6 Nov (audit)</text>
+    <text class="c-label c-strong" x={x(last[1]) - 8} y={y(last[2]) - 10} text-anchor="end">F111</text>
+  </svg>
+</Figure>

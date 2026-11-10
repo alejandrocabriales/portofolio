@@ -1,0 +1,84 @@
+---
+/**
+ * Path of one inbound message, from the channel to a reply or a human handoff.
+ * Boxes with the accent stroke are the ones the model touches; everything else
+ * is deterministic code.
+ */
+import Figure from './Figure.astro';
+---
+
+<Figure
+  title="Path of a message"
+  subtitle="From WhatsApp to a booking. Accent boxes are where the model is involved; the rest is deterministic code."
+  scroll
+>
+  <svg
+    viewBox="0 0 960 330"
+    role="img"
+    aria-label="WhatsApp and Instagram messages reach the CRM, which calls the Worker. A Durable Object per contact batches messages into one turn. The agent consults the model, validated tools write to the booking system and CRM, and guards review the draft before it is sent or handed to the team."
+  >
+    <defs>
+      <marker id="mf-arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" class="d-head" />
+      </marker>
+      <marker id="mf-arrow-alt" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+        <path d="M0,0 L10,5 L0,10 z" class="d-head--alt" />
+      </marker>
+    </defs>
+
+    <rect class="d-box" x="10" y="30" width="150" height="70" rx="4" />
+    <text class="d-name" x="85" y="60" text-anchor="middle">WhatsApp · IG</text>
+    <text class="d-desc" x="85" y="80" text-anchor="middle">inbound</text>
+
+    <rect class="d-box" x="200" y="30" width="150" height="70" rx="4" />
+    <text class="d-name" x="275" y="60" text-anchor="middle">CRM</text>
+    <text class="d-desc" x="275" y="80" text-anchor="middle">webhook</text>
+
+    <rect class="d-box" x="390" y="30" width="170" height="70" rx="4" />
+    <text class="d-name" x="475" y="60" text-anchor="middle">Durable Object</text>
+    <text class="d-desc" x="475" y="80" text-anchor="middle">1 per contact · 20 s</text>
+
+    <rect class="d-box d-box--model" x="600" y="30" width="170" height="70" rx="4" />
+    <text class="d-name" x="685" y="60" text-anchor="middle">Agent</text>
+    <text class="d-desc" x="685" y="80" text-anchor="middle">prompt + state</text>
+
+    <rect class="d-box d-box--model" x="810" y="30" width="140" height="70" rx="4" />
+    <text class="d-name" x="880" y="60" text-anchor="middle">LLM</text>
+    <text class="d-desc" x="880" y="80" text-anchor="middle">interprets</text>
+
+    <path class="d-arrow" d="M160,65 H198" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M350,65 H388" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M560,65 H598" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M770,58 H808" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M808,74 H772" marker-end="url(#mf-arrow)" />
+
+    <rect class="d-box" x="600" y="160" width="170" height="70" rx="4" />
+    <text class="d-name" x="685" y="190" text-anchor="middle">Tools</text>
+    <text class="d-desc" x="685" y="210" text-anchor="middle">schema · rules</text>
+
+    <rect class="d-box" x="810" y="160" width="140" height="70" rx="4" />
+    <text class="d-name" x="880" y="190" text-anchor="middle">Wix · CRM</text>
+    <text class="d-desc" x="880" y="210" text-anchor="middle">calendar</text>
+
+    <rect class="d-box" x="390" y="160" width="170" height="70" rx="4" />
+    <text class="d-name" x="475" y="190" text-anchor="middle">Guards</text>
+    <text class="d-desc" x="475" y="210" text-anchor="middle">review the draft</text>
+
+    <rect class="d-box d-box--out" x="200" y="160" width="150" height="70" rx="4" />
+    <text class="d-name" x="275" y="190" text-anchor="middle">Reply</text>
+    <text class="d-desc" x="275" y="210" text-anchor="middle">to the customer</text>
+
+    <rect class="d-box d-box--human" x="200" y="255" width="150" height="62" rx="4" />
+    <text class="d-name" x="275" y="282" text-anchor="middle">Spa team</text>
+    <text class="d-desc" x="275" y="300" text-anchor="middle">human handoff</text>
+
+    <path class="d-arrow" d="M685,100 V158" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M770,195 H808" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M600,195 H562" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow" d="M390,195 H352" marker-end="url(#mf-arrow)" />
+    <path class="d-arrow d-arrow--alt" d="M475,230 V286 H352" marker-end="url(#mf-arrow-alt)" />
+    <text class="d-desc" x="485" y="262">2 rejections → team</text>
+    <path class="d-arrow d-arrow--alt" d="M440,160 C440,130 640,130 650,102" marker-end="url(#mf-arrow-alt)" />
+    <text class="d-desc" x="430" y="140" text-anchor="end">rejected: fix and retry</text>
+  </svg>
+</Figure>

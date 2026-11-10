@@ -11,5 +11,6 @@ export const PROFILE = {
   summary: [
     'Computer Science engineer, nine years building full stack web and mobile applications. Deep in the React and Next.js ecosystem on the frontend, with hands-on backend work in Node.js, GraphQL, REST APIs and PostgreSQL.',
     'Most of my time goes to architecture that survives contact with a growing codebase, performance work with numbers attached to it, and shipping products that stay reliable end to end.',
+    'Now applying the same fundamentals to AI engineering. I built and run a production WhatsApp agent for a spa business that orchestrates Claude and OpenAI through OpenRouter for scheduling, inquiries and order classification — with the model interpreting and deterministic, tested code deciding. Cursor and Claude Code are part of my daily workflow.',
   ],
 } as const;

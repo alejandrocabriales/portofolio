@@ -25,6 +25,20 @@ export const getStaticPaths: GetStaticPaths = async () => {
   return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
 };
 
+/**
+ * MDX posts carry `import` lines and component tags (charts, diagrams) that
+ * mean nothing outside the site. Both are dropped; the prose around each
+ * figure already states what it shows. Plain `.md` posts pass through
+ * unchanged — neither pattern can match ordinary markdown at line start.
+ */
+function toPlainMarkdown(body: string): string {
+  return body
+    .replace(/^import\s.+$/gm, '')
+    .replace(/^<[A-Z][\s\S]*?\/>\s*$/gm, '')
+    .replace(/\n{3,}/g, '\n\n')
+    .trimStart();
+}
+
 export const GET: APIRoute = ({ props }) => {
   const post = props['post'] as Post;
 
@@ -42,7 +56,7 @@ export const GET: APIRoute = ({ props }) => {
     '',
   ].join('\n');
 
-  return new Response(`${frontmatter}${post.body ?? ''}`, {
+  return new Response(`${frontmatter}${toPlainMarkdown(post.body ?? '')}`, {
     headers: {
       // `charset` is explicit: without it the em dashes and typographic quotes
       // this site uses heavily are decoded as latin-1 by strict clients.

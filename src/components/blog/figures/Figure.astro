@@ -1,0 +1,29 @@
+---
+/**
+ * Frame for a chart or diagram inside a post.
+ *
+ * Title and subtitle are plain paragraphs, not headings: a figure label in the
+ * heading outline would put every chart in the table of contents.
+ *
+ * `scroll` is for diagrams whose labels stop being legible when the SVG scales
+ * down to phone width — the figure scrolls sideways inside itself instead, so
+ * the page body never does.
+ */
+interface Props {
+  title: string;
+  subtitle?: string | undefined;
+  source?: string | undefined;
+  scroll?: boolean | undefined;
+}
+
+const { title, subtitle, source, scroll = false } = Astro.props;
+---
+
+<figure class="fig">
+  <p class="fig__title">{title}</p>
+  {subtitle && <p class="fig__sub">{subtitle}</p>}
+  <div class:list={['fig__body', { 'fig__body--scroll': scroll }]}>
+    <slot />
+  </div>
+  {source && <figcaption>{source}</figcaption>}
+</figure>

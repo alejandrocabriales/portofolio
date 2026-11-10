@@ -16,21 +16,48 @@ export interface StackGroup {
 
 export const STACK: StackGroup[] = [
   {
+    label: 'AI engineering',
+    items: [
+      'LLM APIs (Claude, OpenAI via OpenRouter)',
+      'Agent design & orchestration',
+      'Function calling / tool use',
+      'Prompt design',
+      'Conversational flows & task classification',
+      'WhatsApp Business API',
+      'Cursor',
+      'Claude Code',
+    ],
+  },
+  {
     label: 'Frontend',
     items: [
       'React 18+',
       'Next.js (App Router)',
-      'TypeScript',
       'React Server Components',
       'React Native',
       'Redux',
       'Zustand',
       'SWR',
+      'TanStack Query',
     ],
   },
   {
     label: 'Backend & APIs',
-    items: ['Node.js', 'GraphQL (Apollo)', 'REST', 'PostgreSQL', 'Data modeling', 'WebSockets'],
+    items: [
+      'Node.js',
+      'Express',
+      'NestJS',
+      'GraphQL (Apollo)',
+      'REST API design',
+      'PostgreSQL',
+      'MongoDB',
+      'Data modeling',
+      'WebSockets',
+    ],
+  },
+  {
+    label: 'Languages',
+    items: ['TypeScript', 'JavaScript (ES6+)', 'SQL', 'HTML5', 'CSS3'],
   },
   {
     label: 'Design systems',
@@ -46,6 +73,6 @@ export const STACK: StackGroup[] = [
   },
   {
     label: 'Tooling',
-    items: ['Git', 'CI/CD (Vercel, GitHub Actions)', 'Webpack', 'Monorepos'],
+    items: ['Git', 'CI/CD (Vercel, GitHub Actions)', 'Docker', 'Webpack', 'Monorepos'],
   },
 ];

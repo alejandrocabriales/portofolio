@@ -1,6 +1,7 @@
 /**
- * Selected work. Source of truth: CV, plus two shipped products the CV omits
- * (MIPS Portal) that are worth keeping because they are publicly linkable.
+ * Selected work. Source of truth: CV (November 2026), plus shipped products the
+ * CV omits (MIPS Portal, Achra) that are worth keeping because they are
+ * publicly linkable. The booking agent's client stays anonymised.
  *
  * `impact` holds only figures the CV states. Where there is no measured number
  * the field stays null and the UI renders nothing — a case study with a real
@@ -24,6 +25,8 @@ export interface Project {
   stack: string[];
   url: string | null;
   repo: string | null;
+  /** Site-relative path to a post that tells the full story, when one exists. */
+  writeup?: string | undefined;
   featured: boolean;
 }
 
@@ -43,6 +46,32 @@ export const PROJECTS: Project[] = [
     stack: ['Next.js', 'React', 'TypeScript', 'WebSockets', 'SWR', 'Material UI'],
     url: 'https://fusion-nine-eta.vercel.app/',
     repo: null,
+    featured: true,
+  },
+  {
+    slug: 'whatsapp-booking-agent',
+    name: 'WhatsApp Booking Agent',
+    context: 'Independent · spa business in Spain',
+    year: '2026',
+    summary:
+      'Production AI agent that books treatments, answers inquiries and classifies orders over WhatsApp and Instagram — no front desk in the loop.',
+    problem:
+      'Almost every booking arrives as a free-form chat message: several people, a vague day, a gift card, a deposit. The agent had to understand that, check the real calendar, create the booking with its deposit and keep the CRM current — and know when not to answer and hand the conversation to the team instead.',
+    contribution:
+      'Built and operate it end to end in Node.js and TypeScript on Cloudflare Workers, routing conversations through OpenRouter to Claude and OpenAI. A Durable Object per contact batches messages into a single turn so replies never cross; the model works through tools with validated schemas and never writes to the calendar (Wix) or the CRM (GoHighLevel) itself — code checks every action, and guards review each draft before it is sent. Every production failure is logged in a numbered risk map that drives the design and the test suite.',
+    impact: null,
+    stack: [
+      'Node.js',
+      'TypeScript',
+      'Cloudflare Workers',
+      'OpenRouter',
+      'Claude',
+      'OpenAI',
+      'WhatsApp Business API',
+    ],
+    url: null,
+    repo: null,
+    writeup: '/blog/111-failures-of-a-booking-chatbot/',
     featured: true,
   },
   {

@@ -137,14 +137,15 @@ const path = Astro.url.pathname;
     background-color: var(--color-accent-text);
   }
 
-  /* Below 40rem the destination list drops out and the pill keeps wordmark +
-   * contact + theme. The index page is itself the navigation on a phone. */
+  /* Below 40rem the in-page anchors drop out — on a phone the index page is its
+   * own navigation. Writing stays: it is a separate route, and hiding it left
+   * no way to reach the blog from a phone. */
   @media (max-width: 40rem) {
-    .nav__list {
+    .nav__list li:has(a[href^='/#']) {
       display: none;
     }
-    .nav__end {
-      margin-inline-start: auto;
+    .nav {
+      gap: var(--space-xs);
     }
   }
 </style>

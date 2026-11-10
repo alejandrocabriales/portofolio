@@ -1,0 +1,70 @@
+---
+/** Price per million tokens for the two routing profiles, grouped by direction. */
+import Figure from './Figure.astro';
+
+const groups: [label: string, cheap: number, strong: number][] = [
+  ['Input', 1.5, 0.1],
+  ['Output', 9.0, 0.5],
+];
+
+const W = 640;
+const H = 230;
+const left = 44;
+const right = 10;
+const top = 20;
+const bottom = 46;
+const maxY = 10;
+const barW = 70;
+
+const y = (v: number) => top + (H - top - bottom) * (1 - v / maxY);
+const groupW = (W - left - right) / groups.length;
+const money = (v: number) => `$${v.toFixed(2)}`;
+---
+
+<Figure
+  title="Price per million tokens"
+  subtitle="What we called “cheap” against the model already handling the hardest turns."
+  source="Source: published OpenRouter prices, checked 27 Oct 2026."
+>
+  <svg
+    viewBox={`0 0 ${W} ${H}`}
+    role="img"
+    aria-label="Price per million tokens. Cheap profile: $1.50 input, $9.00 output. Strong profile: $0.10 input, $0.50 output."
+  >
+    {
+      [0, 2.5, 5, 7.5, 10].map((t) => (
+        <>
+          <line class="c-grid" x1={left} x2={W - right} y1={y(t)} y2={y(t)} />
+          <text class="c-label" x={left - 6} y={y(t) + 4} text-anchor="end">{`$${t}`}</text>
+        </>
+      ))
+    }
+    {
+      groups.map(([label, cheap, strong], g) => {
+        const centre = left + groupW * g + groupW / 2;
+        const bars = [
+          { v: cheap, cls: 'c-hi', name: '“cheap”' },
+          { v: strong, cls: 'c-bar', name: '“strong”' },
+        ];
+        return (
+          <>
+            {bars.map((b, s) => {
+              const bx = centre - barW - 6 + s * (barW + 12);
+              const by = y(b.v);
+              return (
+                <>
+                  <rect class={b.cls} x={bx} y={by} width={barW} height={Math.max(y(0) - by, 2)} rx="2" />
+                  <text class="c-label c-strong" x={bx + barW / 2} y={by - 6} text-anchor="middle">{money(b.v)}</text>
+                  <text class="c-label" x={bx + barW / 2} y={y(0) + 15} text-anchor="middle">{b.name}</text>
+                </>
+              );
+            })}
+            <text class="c-label c-strong" x={centre} y={H - 8} text-anchor="middle">
+              {`${label} · ×${Math.round(cheap / strong)}`}
+            </text>
+          </>
+        );
+      })
+    }
+  </svg>
+</Figure>

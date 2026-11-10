@@ -41,7 +41,7 @@ const ref = (id: string) => ({ '@id': id });
  * relationship is the kind of overreach that gets structured data ignored.
  */
 export function personNode(): SchemaNode {
-  const current = EXPERIENCE.find((role) => role.end === null);
+  const current = EXPERIENCE.find((role) => role.end === null && !role.independent);
   const knowsAbout = [...new Set(STACK.flatMap((group) => group.items))];
 
   return {
