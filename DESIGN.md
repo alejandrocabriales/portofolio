@@ -214,8 +214,13 @@ Nearly square. Cards, impact badges, code blocks and figures use a 4px radius; i
 ### Status Chip
 - **Style:** pill, hairline border, mono 0.6875rem uppercase in `muted`, 6px amber dot. Shown only while `AVAILABILITY.open`.
 
+### Contact Nudge
+- **Style:** one Space Grotesk 1.125rem question left, the email address right as an underlined `amber-text` mono link, between hairlines. Ends case studies and posts.
+- **Attached variant:** under the post share bar it drops its own rules and shares the bar's bottom rule, so the ending never stacks more than two hairlines.
+
 ### Figures (blog)
 - **Style:** hairline box, 4px radius, build-time SVG. Mono 11px axis text in `muted`; bars in `muted`, the highlighted bar or line in amber, grid lines in `rule`. One accent meaning per chart.
+- **Mobile:** every chart drawn on a 640-unit viewBox renders at ≥620px inside a horizontally scrolling, keyboard-focusable region with a "Scroll sideways →" hint, so labels never fall below ~11px.
 
 ## Do's and Don'ts
 

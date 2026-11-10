@@ -195,13 +195,31 @@
   block-size: auto;
 }
 
-/* Diagrams keep a legible minimum and scroll inside the figure on a phone. */
+/* Figures keep a legible minimum and scroll inside the frame on a phone. */
 .prose .fig__body--scroll {
   overflow-x: auto;
 }
 @media (max-width: 40rem) {
+  .prose .fig {
+    padding-inline: var(--space-sm);
+  }
   .prose .fig__body--scroll svg {
     min-inline-size: 620px;
+  }
+}
+
+/* The cut-off diagram edge alone does not read as "scrollable" — on a phone it
+ * reads as broken. The hint shows only where the scroll actually happens. */
+.prose .fig__hint {
+  display: none;
+  margin-block-start: var(--space-2xs);
+  font-family: var(--font-mono);
+  font-size: 0.6875rem;
+  color: var(--color-faint);
+}
+@media (max-width: 40rem) {
+  .prose .fig__hint {
+    display: block;
   }
 }
 

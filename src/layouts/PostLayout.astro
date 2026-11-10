@@ -9,6 +9,7 @@ import ShareBar from '@/components/blog/ShareBar.astro';
 import PostNav from '@/components/blog/PostNav.astro';
 import RelatedPosts from '@/components/blog/RelatedPosts.astro';
 import ReadingProgress from '@/components/blog/ReadingProgress.astro';
+import ContactNudge from '@/components/ui/ContactNudge.astro';
 
 import { getSiblings, getRelated, type Post } from '@/lib/posts';
 import { canonicalUrl, ogImagePathFor, resolveOgImage } from '@/lib/seo';
@@ -97,6 +98,7 @@ const crumbs = breadcrumbNode(url, [
       </article>
 
       <ShareBar title={post.data.title} url={url} />
+      <ContactNudge line="Building something with the same problems?" attached />
       <RelatedPosts posts={related} />
       <PostNav prev={prev} next={next} />
     </main>

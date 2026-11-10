@@ -5,8 +5,9 @@
  * Title and subtitle are plain paragraphs, not headings: a figure label in the
  * heading outline would put every chart in the table of contents.
  *
- * `scroll` is for diagrams whose labels stop being legible when the SVG scales
- * down to phone width — the figure scrolls sideways inside itself instead, so
+ * `scroll` is for figures whose labels stop being legible when the SVG scales
+ * down to phone width — every 640-unit chart, where 11px labels would render
+ * at ~5px on a phone. The figure scrolls sideways inside itself instead, so
  * the page body never does.
  */
 interface Props {
@@ -22,8 +23,16 @@ const { title, subtitle, source, scroll = false } = Astro.props;
 <figure class="fig">
   <p class="fig__title">{title}</p>
   {subtitle && <p class="fig__sub">{subtitle}</p>}
-  <div class:list={['fig__body', { 'fig__body--scroll': scroll }]}>
+  {
+    /* A scrolling region must be reachable by keyboard (arrow keys scroll it
+      once focused), and it needs a name so focus lands somewhere meaningful. */
+  }
+  <div
+    class:list={['fig__body', { 'fig__body--scroll': scroll }]}
+    {...scroll ? { tabindex: 0, role: 'region', 'aria-label': title } : {}}
+  >
     <slot />
   </div>
+  {scroll && <p class="fig__hint" aria-hidden="true">Scroll sideways →</p>}
   {source && <figcaption>{source}</figcaption>}
 </figure>

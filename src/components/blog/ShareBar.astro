@@ -40,6 +40,8 @@ const mailto = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURICom
 
 <style>
   .share {
+    /* Clear of the article: without it the top rule touches the last line. */
+    margin-block-start: var(--space-2xl);
     display: flex;
     align-items: baseline;
     flex-wrap: wrap;

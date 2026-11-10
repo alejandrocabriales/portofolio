@@ -14,6 +14,9 @@ import { blogNode } from '@/lib/schema';
 const posts = await getIndexedPosts();
 const tags = await getTags();
 
+/** "Featured" only distinguishes anything when some posts are not. */
+const markFeatured = posts.some((p) => p.data.featured) && posts.some((p) => !p.data.featured);
+
 /**
  * No BreadcrumbList here: the page renders no visible trail, and Google's
  * guidance is that structured data describe what is on the page. The deep
@@ -64,7 +67,7 @@ const canonical = canonicalUrl(Astro.url);
             posts.map((post) => (
               <IndexRow
                 title={post.data.title}
-                subtitle={post.data.featured ? `Featured · ${post.data.category}` : post.data.category}
+                subtitle={markFeatured && post.data.featured ? `Featured · ${post.data.category}` : post.data.category}
                 description={post.data.description}
                 meta={`${formatDate(post.data.published)} · ${readingTime(post)} min`}
                 href={postPath(post)}
@@ -94,6 +97,8 @@ const canonical = canonicalUrl(Astro.url);
   }
 
   .tags {
+    /* Clear of the search field: glued to it, the tags read as its suggestions. */
+    margin-block-start: var(--space-md);
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2xs) var(--space-sm);
