@@ -5,6 +5,7 @@ import path from 'node:path';
 import { defineConfig } from 'astro/config';
 import tailwindcss from '@tailwindcss/vite';
 import mdx from '@astrojs/mdx';
+import sentry from '@sentry/astro';
 // `ChangeFreqEnum` is a real TypeScript enum, so the string literals it holds
 // are not assignable to `changefreq` on their own.
 import sitemap, { ChangeFreqEnum } from '@astrojs/sitemap';
@@ -130,6 +131,21 @@ export default defineConfig({
   },
 
   integrations: [
+    /**
+     * Error monitoring. Runtime options (DSN, sample rates) live in
+     * `sentry.client.config.js`, which the integration picks up by name.
+     * The auth token only enables source-map upload at build time; without it
+     * the build still succeeds and events still arrive, just unsymbolicated.
+     *
+     * Declared here and nowhere else: Astro resolves `astro.config.mjs` before
+     * `astro.config.ts`, so a second config file silently replaces this one —
+     * MDX, Tailwind, the sitemap and `site` all disappear with it.
+     */
+    sentry({
+      project: 'javascript-astro',
+      org: 'alejandro-3a',
+      ...(process.env['SENTRY_AUTH_TOKEN'] ? { authToken: process.env['SENTRY_AUTH_TOKEN'] } : {}),
+    }),
     mdx(),
     sitemap({
       /**
