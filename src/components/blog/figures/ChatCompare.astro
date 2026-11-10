@@ -1,0 +1,45 @@
+---
+/**
+ * Before / after of one conversation. Messages are reconstructed and
+ * anonymised — never paste a real customer transcript here.
+ */
+interface Message {
+  from: 'bot' | 'customer';
+  text: string;
+  /** Mono annotation under the bubble: what the system did. */
+  note?: string;
+}
+
+interface Side {
+  messages: Message[];
+  caption: string;
+}
+
+interface Props {
+  before: Side;
+  after: Side;
+}
+
+const { before, after } = Astro.props;
+const sides = [
+  { label: 'Before', tone: 'before', ...before },
+  { label: 'After', tone: 'after', ...after },
+] as const;
+---
+
+<div class="chats">
+  {
+    sides.map((side) => (
+      <div class={`chat chat--${side.tone}`}>
+        <p class="chat__label">{side.label}</p>
+        {side.messages.map((m) => (
+          <p class={`chat__msg chat__msg--${m.from}`}>
+            {m.text}
+            {m.note && <small>{m.note}</small>}
+          </p>
+        ))}
+        <p class="chat__caption">{side.caption}</p>
+      </div>
+    ))
+  }
+</div>

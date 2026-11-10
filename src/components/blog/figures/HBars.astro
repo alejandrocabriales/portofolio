@@ -1,0 +1,57 @@
+---
+/**
+ * Horizontal bar chart, rendered to SVG at build time — no client JS.
+ * `highlight` marks the one bar the surrounding prose is about.
+ */
+import Figure from './Figure.astro';
+
+interface Row {
+  label: string;
+  value: number;
+  highlight?: boolean;
+  dim?: boolean;
+}
+
+interface Props {
+  title: string;
+  subtitle?: string;
+  source?: string;
+  rows: Row[];
+  max?: number;
+}
+
+const { title, subtitle, source, rows, max = Math.max(...rows.map((r) => r.value)) } = Astro.props;
+
+const width = 640;
+const rowH = 34;
+const labelW = 230;
+const valueW = 40;
+const height = rows.length * rowH + 4;
+const scale = (v: number) => ((width - labelW - valueW) * v) / max;
+const summary = rows.map((r) => `${r.label}: ${r.value}`).join('; ');
+---
+
+<Figure title={title} subtitle={subtitle} source={source}>
+  <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title}. ${summary}`}>
+    {
+      rows.map((r, i) => {
+        const y = i * rowH;
+        const w = Math.max(scale(r.value), 3);
+        const cls = r.highlight ? 'c-hi' : r.dim ? 'c-dim' : 'c-bar';
+        return (
+          <g>
+            <text class:list={['c-label', { 'c-strong': r.highlight }]} x={labelW - 10} y={y + 21} text-anchor="end">
+              {r.label}
+            </text>
+            <rect class={cls} x={labelW} y={y + 8} width={w} height={rowH - 16} rx="2">
+              <title>{`${r.label}: ${r.value}`}</title>
+            </rect>
+            <text class="c-label c-strong" x={labelW + w + 8} y={y + 21}>
+              {r.value}
+            </text>
+          </g>
+        );
+      })
+    }
+  </svg>
+</Figure>

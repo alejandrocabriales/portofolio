@@ -1,0 +1,309 @@
+---
+title: 111 failures of a booking chatbot, and what each one taught me
+description: Four weeks building and running a WhatsApp booking bot in production — how 111 logged failures reshaped its design, its tests and its model bill.
+published: 2026-11-10
+category: AI Engineering
+tags: ['llm', 'chatbot', 'cloudflare-workers', 'testing', 'case-study']
+featured: true
+---
+
+import MessageFlow from '@/components/blog/figures/MessageFlow.astro';
+import FailureCurve from '@/components/blog/figures/FailureCurve.astro';
+import ChatCompare from '@/components/blog/figures/ChatCompare.astro';
+import Handoffs from '@/components/blog/figures/Handoffs.astro';
+import HBars from '@/components/blog/figures/HBars.astro';
+import ModelCost from '@/components/blog/figures/ModelCost.astro';
+
+For four weeks I built and operated a booking assistant for a wellness spa in
+Spain, answering customers on WhatsApp and Instagram. It went live for every
+customer on 29 October. Since then, every real conversation that went wrong has
+become a numbered entry in one document: the **risk map**. Today it has 111.
+
+This post is about those 111 failures — how we diagnosed them, which ones
+changed the design, and why the project ended up with more lines of tests than
+of code: 1,558 automated tests, 38 architecture decision records, and a set of
+rules that each trace back to a specific failure.
+
+## The problem
+
+Almost every booking at the spa arrives through WhatsApp or a Meta lead form.
+Each conversation has the same shape: which treatment, for how many people,
+which day, what time, and how the deposit gets paid. It looks simple until a
+real customer writes it: *"for my mum and me, next Saturday afternoon, at the
+same time if possible, and I have a gift card from my sister."*
+
+The system had to do four things with no human involved: understand the
+message, check the real calendar in Wix, create the booking with its deposit,
+and keep the CRM (GoHighLevel) up to date. And a fifth, the hardest: know when
+*not* to answer, and hand the conversation to the spa team.
+
+> The model interprets. The code decides. Anything that can be verified —
+> prices, times, payments, permissions — lives in deterministic code with a
+> test.
+
+## How it is built
+
+Everything runs in a single Cloudflare Worker. When a message arrives, a
+**Durable Object per contact** receives it, waits 20 seconds in case the
+customer keeps typing, and processes the batch as one turn. Two messages in a
+row from the same customer can never produce two crossed replies.
+
+Inside a turn, the agent talks to the model and offers it tools with validated
+schemas: find slots, prepare a booking, verify a gift card, check a payment,
+hand off to the team. The model never writes to Wix or the CRM. It asks, and
+the code checks whether the action is allowed. Before any reply is sent, a set
+of **guards** reviews the draft.
+
+<MessageFlow />
+
+That was not the first design. The agent started as one function of about 950
+lines, with 96 `if` statements and 25 shared mutable variables. Every fix added
+another branch somewhere in the middle. Halfway through, I split it into named
+steps — load context, decide before the model, converse with tools, review with
+guards, persist — without changing a single line of behaviour: one step per
+commit, tests green on each one.
+
+## 111 failures: the curve
+
+Every entry in the risk map has a number (F1 to F111), the file where it
+originates, its cause and its status. Logging them this way had an effect I did
+not expect: with all of them in one place, it became obvious that many were the
+same failure wearing different clothes.
+
+<FailureCurve />
+
+As of today, 82 are fixed, 8 mitigated and 21 open. Almost half of the open
+ones are not technical at all — they are business questions the code must not
+answer on its own. Is the deposit refunded if a customer cancels with less than
+24 hours' notice? What do we tell someone writing out of hours when the team
+will take 14 hours to reply? I learned not to infer commercial policy from a
+prompt or a one-off example. If it is not written down, we ask.
+
+## Five failures that changed the design
+
+### 1. The compound message (F88)
+
+The customer picks a time and, in the same message, adds another person. The
+bot read the first half and booked.
+
+<ChatCompare
+  before={{
+    messages: [
+      { from: 'bot', text: 'I have Friday at 16:00 or 18:00 for the Essential.' },
+      { from: 'customer', text: '16:00 is perfect. Can I bring my partner?' },
+      { from: 'bot', text: 'Done! Here is the link for the €30 deposit.', note: 'booked for 1 person' },
+    ],
+    caption: 'One room booked and one deposit charged. The partner had no slot at that time.',
+  }}
+  after={{
+    messages: [
+      { from: 'bot', text: 'I have Friday at 16:00 or 18:00 for the Essential.' },
+      { from: 'customer', text: '16:00 is perfect. Can I bring my partner?' },
+      {
+        from: 'bot',
+        text: 'For two at the same time, Friday I have 18:00 — at 16:00 only one room is left. Does 18:00 work?',
+        note: 'searches slots again for 2',
+      },
+    ],
+    caption: 'A booking detail that changes in the same message invalidates the earlier choice. The code decides that, not the model.',
+  }}
+/>
+
+The obvious fix was a regex for *"can I bring…?"*. We did not write it. The
+failure class was wider: any booking detail — party size, service, day — that
+the customer changes together with their choice. Two days later the variant
+*"16:00 is perfect, but make it the Luxury"* appeared (F93), and the same rule
+already covered it.
+
+### 2. The booking that succeeded and arrived as an error (F73)
+
+The CRM returned a 400 because the customer's email already belonged to another
+contact. The domain code already knew how to handle that: create a task for the
+team and carry on with the booking. But the turn coordinator only saw *"an
+effect failed"* and sent the conversation to review. The team received a
+perfectly good booking flagged as failed.
+
+The rejection path existed and had tests — it had just never been tested
+*through the coordinator*. That produced a rule: every external error is tested
+on all three of its paths — a rejection the code resolves, a rejection it does
+not, and an uncertain outcome such as a timeout or a 5xx — through the real
+chain up to what the customer sees. And the log level is part of the contract:
+`error` only for real failures; an expected, resolved rejection is `warn`.
+
+### 3. The write limit nobody checked (F94)
+
+Two real bookings failed with `KV PUT failed: 429`. The booking journal was
+written 15 to 20 times per operation to Workers KV, which allows one write per
+second per key. Wix and the CRM had the appointment; our own record said it had
+failed.
+
+The fix was not to space the writes out. We moved the journal into the
+contact's Durable Object, which already owned the turn and has no such limit.
+It shipped behind a flag, with a lazy migration and a KV mirror during the
+transition, so we could roll back in a minute.
+
+### 4. The language our own markers decided (F98)
+
+A customer wrote in English and got replies in Spanish. We first blamed an
+ambiguous phrase of hers (F95). The real cause was in the history: when a
+customer sends a photo with no text, the system inserts an internal marker —
+written in Spanish — saying the customer sent a file. The language detector
+read it as if she had written it.
+
+The lesson was about method. The first hypothesis was reasonable and wrong.
+Since then, no fix is proposed without the causal chain, down to file and line:
+exactly what the model or the code saw when it failed, and who put it there.
+
+### 5. The guards that rescued too much (F37)
+
+The guards review every draft before it is sent. If one rejects it, the model
+corrects; if it is rejected twice, the conversation goes to the team. It
+worked — until we counted.
+
+<Handoffs />
+
+Almost a third of all handoffs were caused by our own safety net — sometimes
+over a filler phrase, or a correct time the guard did not recognise in English.
+
+> A net that catches a failure after it happens is not a fix. First try to
+> prevent it at the source; if you choose to rescue instead, write down why.
+
+## Classes of failure, not incidents
+
+On 7 November I did an uncomfortable exercise. I took the 64 real
+conversations with a problem since launch and classified each failure by
+*where it would have to be fixed*. Sixteen were correct handoffs under the
+business's own policy. That left 48 real failures.
+
+My starting hypothesis was that a better architecture — a single owner for
+each conversation's state — would solve most of them. The data said otherwise.
+
+<HBars
+  title="Where the cause of 48 real failures lived"
+  subtitle="Only 1 of 48 would have been avoided by moving state to one place. 40 are fixed in deterministic code."
+  source="Source: 64 real conversations, 29 Oct – 7 Nov 2026, cross-referenced with the risk map and issues."
+  rows={[
+    { label: 'Rules inside the tools', value: 15 },
+    { label: 'Guards: 2 rejections → team', value: 13 },
+    { label: 'Agent or prompt', value: 7 },
+    { label: 'External or business decision', value: 7, dim: true },
+    { label: 'Turn coordinator', value: 5 },
+    { label: 'Scattered state (architecture)', value: 1, highlight: true },
+  ]}
+  max={16}
+/>
+
+That classification saved us a large rewrite that would have touched 2% of the
+problem. It also taught me to name the class before writing code. Four
+entries in the map — F35, F37, F58 and F74 — logged on four different days as
+separate incidents, were the same thing: a guard rejecting a correct reply and
+handing off on the second rejection.
+
+## Testing a system that is not deterministic
+
+A unit test tells you whether a function returns what you expect. A chatbot can
+answer correctly in a hundred ways and wrongly in a thousand. We needed two
+different layers.
+
+**The deterministic layer** runs on every commit and costs nothing: 1,558
+tests, including 723 intent cases (*"is this sentence buying a gift card or
+redeeming one?"*) with their negatives. If someone changes a detector, the old
+cases complain.
+
+**The model layer** is a dataset of 214 conversations run against a simulator
+of the bot using the real model. Every run costs money, so it only runs when
+needed and never automatically.
+
+The protocol for a behaviour bug never changes: write the case that reproduces
+it, run it, and confirm it fails. Only then touch the code. And one rule that
+took a while to learn: you may not edit the expected result of an existing case
+to make it pass. If the business criterion changed, the owner decides and it
+gets written down.
+
+Two details that look minor and are not:
+
+- **Evaluate the outcome, not the mechanism.** A case states what the customer
+  sees and what the team sees, and lists the valid answers. It does not demand
+  an exact text or a specific tool, because that makes the test fail when the
+  bot improves.
+- **The simulator must produce the same text as production.** Some red cases
+  turned out to be simulator bugs, not bot bugs. A case that cannot fail proves
+  nothing: if the simulation does not go through the code that failed, document
+  the gap instead of adding a case that is green both before and after.
+
+## The "cheap" model was the expensive one
+
+The bot's router had two profiles: a "cheap" one for greetings and information
+questions — most of the traffic — and a "strong" one for bookings and payments.
+Reviewing prices on OpenRouter, I found the names described the capability we
+asked for, not the cost. The cheap model cost 15 times more per input token and
+18 times more per output token than the strong one.
+
+<ModelCost />
+
+We moved all traffic to the model that was already handling the hard turns,
+then tuned the prompt against that model's official prompting guide. With a
+stable prompt of about 24,000 fixed tokens per call (prompt, tools and service
+sheets), 92.8% of input is served from cache. The median cost per turn settled
+around two tenths of a US cent, with a median model latency of 5.4 seconds.
+
+Privacy was part of the accounting too: calls go out with provider data
+collection disabled, and secrets never pass through logs or prompts.
+
+## Business impact
+
+<div class="pending">
+  **Pending.** The business's pre-bot baseline was recorded on launch day. The
+  comparison — bookings completed without a human, response time,
+  conversion from first message — will be added here once the first full month
+  in production closes at the end of November 2026.
+</div>
+
+## The rules that stuck
+
+The repository started with a README. It now has a set of rules that anyone —
+person or AI agent — touching the code has to follow. None was written in
+advance: each one carries the number of the failure that produced it.
+
+1. **The LLM interprets; the code decides.** Prices, times, payments and
+   permissions are verified in code with a test. The prompt only lowers the
+   odds of the mistake.
+2. **Reproduce before fixing.** A case that fails before the change, in the
+   layer where the failure originates, through the real chain to the customer.
+3. **No causal chain, no proposal.** File and line of what the model actually
+   received (F91: a guard was proposed for a symptom whose cause was an
+   internal instruction withholding the data).
+4. **Name the class, not the incident.** Which family of inputs produces the
+   same error? Without a named class, a regex does not get merged (F88, F93).
+5. **Prevent before rescuing.** Output guards are the last line, not the
+   strategy (F37).
+6. **One source of truth per rule.** Availability was once computed in four
+   places with four different rules (F7).
+7. **Never silence an error, never fabricate a success.** Every external error
+   is tested on its three paths, and the log level is part of the contract
+   (F73).
+8. **Business policy belongs to the business.** If a policy is not written, ask.
+   Do not infer it from an example.
+9. **Every production change is reversible; every significant decision gets an
+   ADR.** A flag, a noted rollback version — and 38 ADRs in four weeks, which
+   are the memory of why the code is the way it is. Every patch ships with its
+   structural follow-up written down.
+
+## What I would do differently
+
+I would start the risk map on day one, not after the first incident. I would
+write the tests for the error paths before the happy path. And I would distrust
+text-matching guards sooner: every list of forbidden phrases eventually caused
+a new failure.
+
+What I would not change is the discipline of logging every failure with a
+number, a cause and a file. A hundred and eleven entries sounds like a lot. In
+practice it is the most useful document in the project — the one that explains
+why every line of code is there.
+
+---
+
+*Figures were taken from the project repository and the bot's event log on 10
+November 2026. Example conversations are reconstructed and anonymised and
+contain no real customer data. Stack: Cloudflare Workers, Durable Objects, KV
+and D1 · Wix Bookings · GoHighLevel · OpenRouter · TypeScript · node:test.*

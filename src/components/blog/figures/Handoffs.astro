@@ -1,0 +1,26 @@
+---
+/** One square per real contact handed to the team in 30 days. */
+import Figure from './Figure.astro';
+
+const total = 36;
+const byGuard = 11;
+const side = 15;
+const gap = 2.5;
+const W = total * (side + gap);
+---
+
+<Figure
+  title="Handoffs to the team in 30 days"
+  subtitle="Real contacts only. Almost one in three reached a person because a guard rejected two drafts in a row."
+  source="Source: bot event log, test contacts excluded, 30 days to 7 Nov 2026."
+>
+  <svg viewBox={`0 0 ${W} 64`} role="img" aria-label="36 contacts handed off, 11 of them by the output guards.">
+    {
+      Array.from({ length: total }, (_, i) => (
+        <rect class={i < byGuard ? 'c-hi' : 'c-dim'} x={i * (side + gap)} y="2" width={side} height={side} rx="2" />
+      ))
+    }
+    <text class="c-label c-strong" x="0" y="38">11 by the output guards (31%)</text>
+    <text class="c-label" x="0" y="56">25 for other reasons: customer asked, out of policy, external errors</text>
+  </svg>
+</Figure>
