@@ -74,8 +74,8 @@ const crumbs = breadcrumbNode(url, [
         the nav, footer and metadata don't pollute every result's excerpt. -->
       <article data-pagefind-body>
         <header class="post-header">
-          <PostMeta post={post} showUpdated />
           <h1 class="post-header__title" data-pagefind-meta="title">{post.data.title}</h1>
+          <div class="post-header__meta"><PostMeta post={post} showUpdated /></div>
           <p class="post-header__description">{post.data.description}</p>
 
           {
@@ -133,9 +133,14 @@ const crumbs = breadcrumbNode(url, [
   }
 
   .post-header__title {
-    margin-block-start: var(--space-2xs);
     font-size: var(--text-display-s);
     max-inline-size: 24ch;
+  }
+
+  /* Date and reading time sit under the title, as PostMeta documents —
+   * above it they read as a kicker competing with the headline. */
+  .post-header__meta {
+    margin-block-start: var(--space-sm);
   }
 
   .post-header__description {

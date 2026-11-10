@@ -12,7 +12,8 @@ import { EXPERIENCE, EDUCATION, LANGUAGES } from '@/data/experience';
 import { PROJECTS } from '@/data/projects';
 import { STACK } from '@/data/stack';
 import { PROFILE } from '@/data/profile';
-import { formatRange } from '@/lib/format';
+import { formatRange, formatDate } from '@/lib/format';
+import { getIndexedPosts, postPath, readingTime } from '@/lib/posts';
 import { canonicalUrl } from '@/lib/seo';
 import { PERSON_ID, projectListNode } from '@/lib/schema';
 
@@ -26,6 +27,13 @@ const [lead, ...rest] = PROJECTS;
  * collection of documents and reading as one person's profile.
  */
 const canonical = canonicalUrl(Astro.url);
+
+/**
+ * The writing is the other half of the evidence: case studies show outcomes,
+ * posts show how the decisions were made. Featured-first, capped at three so
+ * the section stays a pointer to /blog/ rather than a second blog index.
+ */
+const posts = (await getIndexedPosts()).slice(0, 3);
 ---
 
 <Layout
@@ -55,6 +63,26 @@ const canonical = canonicalUrl(Astro.url);
         </div>
       </IndexSection>
 
+      {
+        posts.length > 0 && (
+          <IndexSection
+            label="Writing"
+            id="writing"
+            action={{ label: 'All writing →', href: '/blog/' }}
+          >
+            {posts.map((post) => (
+              <IndexRow
+                title={post.data.title}
+                subtitle={post.data.category}
+                description={post.data.description}
+                meta={`${formatDate(post.data.published)} · ${readingTime(post)} min`}
+                href={postPath(post)}
+              />
+            ))}
+          </IndexSection>
+        )
+      }
+
       <IndexSection label="Experience" id="experience">
         {
           EXPERIENCE.map((role) => (
@@ -76,15 +104,14 @@ const canonical = canonicalUrl(Astro.url);
         </dl>
       </IndexSection>
 
-      <IndexSection label="Education" id="education">
+      {/* One section, not two: the languages also sit in the masthead rail, and
+        two near-empty sections at full section spacing read as padding. */}
+      <IndexSection label="Education & languages" id="education">
         <IndexRow
           title={EDUCATION.degree}
           subtitle={`${EDUCATION.institution} · ${EDUCATION.location}`}
           meta={`${EDUCATION.start}–${EDUCATION.end}`}
         />
-      </IndexSection>
-
-      <IndexSection label="Languages" id="languages">
         {
           LANGUAGES.map((language) => (
             <IndexRow title={language.name} description={language.level} />

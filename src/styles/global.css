@@ -50,7 +50,8 @@
  *
  * Neutrals carry a trace of the anchor's chroma so the page reads warm rather
  * than flat grey. Contrast ratios against paper are noted where they constrain
- * usage; `--faint` is the only step that cannot legally carry body text.
+ * usage. `--faint` clears AA for small text on paper and paper-2 in both themes,
+ * because it carries dates, years and stack lists — but it stays the quietest step.
  * ------------------------------------------------------------------------ */
 :root {
   color-scheme: light;
@@ -59,7 +60,7 @@
   --paper-2: oklch(95% 0.008 70); /* recessed wells, code blocks   */
   --paper-3: oklch(92.5% 0.009 70); /* hover surface               */
   --rule: oklch(87% 0.008 70); /* hairlines only                   */
-  --faint: oklch(58% 0.012 62); /* ~3.2:1 — large text + icons ONLY */
+  --faint: oklch(53% 0.012 62); /* ~4.9:1 on paper, 4.6:1 on paper-2 — AA for small meta text */
   --muted: oklch(44% 0.013 60); /* ~5.9:1 — safe for body copy      */
   --ink: oklch(20% 0.014 60); /* ~14:1                              */
 
@@ -103,7 +104,7 @@
   --paper-2: oklch(18.5% 0.011 60);
   --paper-3: oklch(22% 0.012 60); /* elevation by lightness, not shadow */
   --rule: oklch(30% 0.01 60);
-  --faint: oklch(58% 0.011 60); /* ~4.8:1 — dark mode is more forgiving */
+  --faint: oklch(62% 0.011 60); /* ~5.4:1 on paper, 5.0:1 on paper-2 */
   --muted: oklch(72% 0.009 62); /* ~7.2:1 */
   --ink: oklch(94% 0.008 70); /* ~13.9:1 */
 
