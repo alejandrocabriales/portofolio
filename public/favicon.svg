@@ -1,20 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
-    <!-- Monogram mark. Replaces the Astro logo the starter shipped with — a
-         favicon is the smallest piece of identity a site has, and pointing it at
-         the framework's logo hands that identity to the framework. -->
+    <!-- Monogram mark. The amber bar is the safelight; the stroke is the deeproom ink — the same
+         short line that leads the nav wordmark, so the tab and the page agree. -->
     <path
         d="M22 102V26l42 50 42-50v76"
-        stroke="#1f1915"
+        stroke="#1e130a"
         stroke-width="15"
         stroke-linejoin="miter"
         stroke-linecap="butt"
     />
-    <!-- The accent dot repeats the nav wordmark, so the tab and the page agree. -->
-    <circle cx="106" cy="102" r="11" fill="#c15800" />
+    <rect x="88" y="94" width="30" height="12" fill="#eea743" />
     <style>
         @media (prefers-color-scheme: dark) {
-            path { stroke: #f0eae4; }
-            circle { fill: #e0843e; }
+            path { stroke: #f0b04f; }
         }
     </style>
 </svg>

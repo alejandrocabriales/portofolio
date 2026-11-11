@@ -22,6 +22,12 @@ export interface Project {
   contribution: string;
   /** Real, sourced metric only. Null renders nothing. */
   impact: string | null;
+  /**
+   * The one figure the sheet shows at display size, with what it measures.
+   * Only CV-stated or logged numbers. Projects without one render as rows,
+   * not sheets — evidence decides the weight on the page.
+   */
+  figure?: { value: string; caption: string; developing?: string | undefined } | undefined;
   stack: string[];
   url: string | null;
   repo: string | null;
@@ -46,6 +52,7 @@ export const PROJECTS: Project[] = [
     stack: ['Next.js', 'React', 'TypeScript', 'WebSockets', 'SWR', 'Material UI'],
     url: 'https://fusion-nine-eta.vercel.app/',
     repo: null,
+    figure: { value: '−40%', caption: 'First Contentful Paint' },
     featured: true,
   },
   {
@@ -72,6 +79,11 @@ export const PROJECTS: Project[] = [
     url: null,
     repo: null,
     writeup: '/blog/111-failures-of-a-booking-chatbot/',
+    figure: {
+      value: '111',
+      caption: 'Production failures logged',
+      developing: 'Business impact · measuring through Nov 2026',
+    },
     featured: true,
   },
   {
@@ -114,6 +126,7 @@ export const PROJECTS: Project[] = [
     stack: ['TypeScript', 'React', 'Tailwind CSS', 'Storybook'],
     url: 'https://powerhouse-design-system.vercel.app/',
     repo: null,
+    figure: { value: '+30%', caption: 'Team development velocity' },
     featured: true,
   },
   {
@@ -146,6 +159,7 @@ export const PROJECTS: Project[] = [
     stack: ['React Native', 'GraphQL', 'Apollo', 'Node.js'],
     url: null,
     repo: null,
+    figure: { value: '−50%', caption: 'GraphQL payload size' },
     featured: false,
   },
 ];

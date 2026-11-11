@@ -28,8 +28,8 @@ import { SITE } from '@/config/site';
       Pagefind would otherwise return it as a result for its own link text. -->
     <main id="main" data-pagefind-ignore>
       <section class="lost">
-        <p class="lost__code">404</p>
         <h1 class="lost__title">That page isn't here.</h1>
+        <p class="lost__code">Error 404</p>
         <p class="lost__lede">
           The link is either out of date or was never right. Everything the site
           does have is one click away.
@@ -52,7 +52,7 @@ import { SITE } from '@/config/site';
 
       <IndexSection label="Elsewhere" id="elsewhere">
         <IndexRow title="Home" description="Profile, experience and stack." href="/" />
-        <IndexRow title="Writing" description="Notes on React, Next.js and Node." href="/blog/" />
+        <IndexRow title="Writing" description="Notes on React, Node and AI engineering in production." href="/blog/" />
         <IndexRow
           title="Email"
           subtitle={SITE.email}
@@ -69,17 +69,23 @@ import { SITE } from '@/config/site';
     padding-block: var(--space-2xl) var(--space-lg);
   }
 
-  .lost__code {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.16em;
-    color: var(--color-accent-text);
+  .lost__title {
+    font-size: var(--text-wall);
+    font-weight: 800;
+    font-stretch: var(--stretch-claim);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    max-inline-size: 10ch;
   }
 
-  .lost__title {
+  /* The status code is metadata about the title, so it sits under it — and in
+   * muted ink, not full ink: nothing on this page is the one thing to look at. */
+  .lost__code {
     margin-block-start: var(--space-2xs);
-    font-size: var(--text-display-s);
-    letter-spacing: -0.03em;
+    font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
+    font-size: 0.8125rem;
+    color: var(--color-muted);
   }
 
   .lost__lede {
