@@ -1,0 +1,365 @@
+---
+/**
+ * The test strip — the site's signature record.
+ *
+ * One strip across the page, 2018 to now, stepped into exposures (one per
+ * role), with the measured outcomes of each role pinned under its step. Each
+ * step is exposed longer than the one before, so the strip darkens toward now;
+ * the current step is the darkest and carries the NOW tag. State is carried by
+ * tone and edge, not colour alone: a pending measurement is dashed.
+ *
+ * Step widths follow duration with a floor, so a role that started last month
+ * still has room for its outcomes. It is an exposure strip, not a time scale —
+ * every step prints its real dates.
+ *
+ * Pure CSS: the strip exposes itself once on load (or as it scrolls into view
+ * where scroll-driven animation exists). No JavaScript.
+ */
+import { EXPERIENCE } from '@/data/experience';
+import { OUTCOMES } from '@/data/record';
+
+const now = new Date();
+const months = (iso: string | null) => {
+  const d = iso ? new Date(`${iso}-01T00:00:00Z`) : now;
+  return d.getUTCFullYear() * 12 + d.getUTCMonth();
+};
+
+// Oldest first: the line reads left to right, toward NOW.
+const roles = [...EXPERIENCE].reverse();
+const durations = roles.map((r) => Math.max(1, months(r.end) - months(r.start)));
+const total = durations.reduce((a, b) => a + b, 0);
+const floor = total * 0.16;
+const weights = durations.map((d) => Math.max(d, floor));
+const weightTotal = weights.reduce((a, b) => a + b, 0);
+
+const phases = roles.map((role, i) => ({
+  role,
+  current: role.end === null,
+  width: `${((weights[i] ?? 0) / weightTotal) * 100}%`,
+  // Years only: the record is a phase diagram; the role list below carries
+  // the months.
+  range: `${role.start.slice(0, 4)} → ${role.end ? role.end.slice(0, 4) : 'now'}`,
+  // Figures live on the contact sheet and the work prints; the strip keeps
+  // only results the CV states without a number, so nothing repeats.
+  outcomes: (OUTCOMES[role.company] ?? []).filter((o) => !o.figure && !o.pending),
+}));
+---
+
+<ol
+  class="record"
+  aria-label="Career record, oldest to newest"
+  style={`--cols: ${phases.map((p) => p.width).join(' ')}`}
+>
+  {
+    phases.map((phase, i) => (
+      <li
+        class:list={['phase', { 'phase--now': phase.current }]}
+        style={`--w: ${phase.width}; --i: ${i}; --tone: ${Math.round(18 + (i / Math.max(1, phases.length - 1)) * 70)}%`}
+      >
+        <div class="phase__head">
+          <time class="phase__range annot">{phase.range}</time>
+          <p class="phase__role">{phase.role.position}</p>
+          <p class="phase__company">{phase.role.company}</p>
+        </div>
+
+        <div class="phase__line" aria-hidden="true">
+          <span class="phase__stroke" />
+          {phase.current && <span class="phase__now annot">Now</span>}
+        </div>
+
+        {phase.outcomes.length > 0 && (
+          <ul class="phase__outcomes">
+            {phase.outcomes.map((outcome) => {
+              const Tag = outcome.href ? 'a' : 'div';
+              return (
+                <li>
+                  <Tag
+                    class:list={[
+                      'outcome',
+                      { 'outcome--pending': outcome.pending, 'outcome--text': !outcome.figure },
+                    ]}
+                    {...(outcome.href ? { href: outcome.href } : {})}
+                  >
+                    {outcome.figure && <span class="outcome__figure tabular">{outcome.figure}</span>}
+                    <span class="outcome__caption">{outcome.caption}</span>
+                  </Tag>
+                </li>
+              );
+            })}
+          </ul>
+        )}
+      </li>
+    ))
+  }
+</ol>
+
+<style>
+  /* Subgrid: every phase shares the same three rows, so the line sits at one
+   * height across the page however much each head wraps. */
+  .record {
+    display: grid;
+    grid-template-columns: var(--cols);
+    grid-template-rows: auto auto auto;
+    list-style: none;
+    margin: 0;
+    padding: var(--space-lg) 0 0;
+  }
+
+  .phase {
+    min-inline-size: 0;
+    grid-row: span 3;
+    display: grid;
+    grid-template-rows: subgrid;
+  }
+
+  /* ---- head ------------------------------------------------------------ */
+  .phase__head {
+    padding-inline-end: var(--space-sm);
+    padding-block-end: var(--space-sm);
+    border-inline-start: var(--rule-hair) solid var(--color-ink);
+    padding-inline-start: var(--space-xs);
+  }
+
+  .phase__range {
+    color: var(--color-faint);
+  }
+
+  .phase__role {
+    margin-block-start: var(--space-3xs);
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-title);
+    font-size: 1.125rem;
+    font-weight: 700;
+    line-height: 1.1;
+  }
+
+  .phase__company {
+    font-size: 0.875rem;
+    color: var(--color-muted);
+  }
+
+  /* ---- the line -------------------------------------------------------- */
+  .phase__line {
+    position: relative;
+    block-size: 1.75rem;
+    display: flex;
+    align-items: center;
+  }
+
+  /* Each step is a band of exposed print: silver at the oldest end, near
+   * black at now. */
+  .phase__stroke {
+    flex: 1 1 auto;
+    block-size: 1.125rem;
+    background-color: color-mix(in oklab, var(--print-ink) var(--tone), var(--print-hi));
+    transform-origin: left center;
+    animation: draw var(--dur-draw) var(--ease-out) both;
+    animation-delay: calc(var(--i) * 260ms);
+  }
+
+  .phase--now .phase__stroke {
+    block-size: 1.75rem;
+  }
+
+  /* Step boundary tick. */
+  .phase__line::after {
+    content: '';
+    position: absolute;
+    inset-inline-start: 0;
+    inset-block: 0;
+    inline-size: var(--rule-heavy);
+    background-color: var(--color-ink);
+  }
+
+  /* NOW closes the strip, on the strip itself. */
+  .phase__now {
+    flex: none;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    background-color: var(--color-field);
+    color: var(--color-on-field);
+  }
+
+  @keyframes draw {
+    from {
+      transform: scaleX(0);
+    }
+    to {
+      transform: scaleX(1);
+    }
+  }
+
+  /* ---- outcomes -------------------------------------------------------- */
+  .phase__outcomes {
+    list-style: none;
+    margin: 0;
+    padding: 0 var(--space-sm) 0 0;
+    display: flex;
+    flex-wrap: wrap;
+    align-content: start;
+    gap: var(--space-sm) var(--space-md);
+    animation: arrive var(--dur-long) var(--ease-out) both;
+    animation-delay: calc(var(--i) * 260ms + 500ms);
+  }
+
+  @keyframes arrive {
+    from {
+      transform: translateY(6px);
+    }
+  }
+
+  .outcome {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    padding-block-start: var(--space-md);
+    padding-inline-start: var(--space-xs);
+    max-inline-size: 13rem;
+    color: inherit;
+    text-decoration: none;
+  }
+
+  /* Leader line from the record down to the figure. */
+  .outcome::before {
+    content: '';
+    position: absolute;
+    inset-block: 0 var(--space-3xs);
+    inset-inline-start: 0;
+    inline-size: var(--rule-hair);
+    background-color: var(--color-ink);
+  }
+
+  .outcome__figure {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-claim);
+    font-size: clamp(2.5rem, 1.6rem + 2.4vw, 3.75rem);
+    font-weight: 800;
+    line-height: 0.9;
+    letter-spacing: -0.03em;
+    color: var(--color-ink);
+    transition: color var(--dur-micro) var(--ease-out);
+  }
+
+  .outcome__caption {
+    margin-block-start: var(--space-2xs);
+    font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
+    font-size: 0.6875rem;
+    line-height: 1.45;
+    color: var(--color-muted);
+  }
+
+  .outcome--text .outcome__caption {
+    font-family: var(--font-body);
+    font-stretch: 100%;
+    font-size: 0.9375rem;
+    color: var(--color-ink);
+  }
+
+  a.outcome:hover .outcome__figure {
+    color: var(--color-accent-text);
+  }
+  a.outcome .outcome__caption {
+    text-decoration: underline;
+    text-decoration-color: var(--color-rule);
+    text-underline-offset: 0.3em;
+  }
+  a.outcome:hover .outcome__caption {
+    text-decoration-color: currentColor;
+  }
+
+  /* Pending: dashed, in both the leader and the frame. */
+  .outcome--pending {
+    padding: var(--space-xs);
+    margin-block-start: var(--space-sm);
+    border: var(--rule-hair) dashed var(--color-accent);
+  }
+  .outcome--pending::before {
+    display: none;
+  }
+  .outcome--pending .outcome__caption {
+    font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
+    font-size: 0.6875rem;
+    color: var(--color-accent-text);
+  }
+
+  /* ---- narrow: the line turns vertical --------------------------------- */
+  @media (max-width: 48rem) {
+    .record {
+      display: flex;
+      flex-direction: column;
+      padding-block-start: var(--space-md);
+    }
+
+    .phase {
+      grid-row: auto;
+      grid-template-rows: auto 1fr;
+      grid-template-columns: 1.25rem minmax(0, 1fr);
+      column-gap: var(--space-sm);
+      padding-block-end: var(--space-lg);
+    }
+
+    .phase__line {
+      grid-row: 1 / span 2;
+      grid-column: 1;
+      block-size: auto;
+      flex-direction: column;
+      align-items: center;
+    }
+    .phase__stroke {
+      inline-size: 0.75rem;
+      block-size: auto;
+      transform-origin: center top;
+      animation-name: draw-down;
+    }
+    .phase--now .phase__stroke {
+      inline-size: 1.25rem;
+      block-size: auto;
+    }
+    .phase__line::after {
+      inset-inline: 0;
+      inset-block: 0 auto;
+      inline-size: auto;
+      block-size: var(--rule-heavy);
+    }
+    /* The range already says "now" and the step is the widest; the tag
+     * would sit on top of the dates. */
+    .phase__now {
+      display: none;
+      align-self: auto;
+      padding: 0.1875rem 0.375rem;
+      position: absolute;
+      inset-inline-start: calc(100% + var(--space-sm));
+      inset-block-start: 0;
+    }
+
+    .phase__head {
+      grid-column: 2;
+      border: 0;
+      padding: 0;
+    }
+    .phase__outcomes {
+      grid-column: 2;
+      padding: 0;
+    }
+    .outcome {
+      padding-block-start: var(--space-xs);
+    }
+    .outcome::before {
+      display: none;
+    }
+
+    @keyframes draw-down {
+      from {
+        transform: scaleY(0);
+      }
+      to {
+        transform: scaleY(1);
+      }
+    }
+
+  }
+</style>

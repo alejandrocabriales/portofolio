@@ -82,16 +82,16 @@ export const SITE = {
    * sRGB conversions of `--paper` in each theme.
    */
   themeColor: {
-    light: '#f9f6f2',
-    dark: '#0e0a07',
+    light: '#f7f5ee',
+    dark: '#222320',
   },
 } as const;
 
 /** Top-level destinations. Order is the order they render in the nav. */
 export const NAV = [
   { label: 'Work', href: '/#work' },
+  { label: 'Record', href: '/#record' },
   { label: 'Writing', href: '/blog/' },
-  { label: 'Stack', href: '/#stack' },
 ] as const;
 
 /**
