@@ -20,8 +20,8 @@
  *
  * ## Typography
  *
- * Cards use the host's Helvetica Neue and Menlo rather than the site's Space
- * Grotesk and JetBrains Mono, for the reason above. They are close enough in
+ * Cards use the host's Helvetica Neue and Menlo rather than the site's Archivo
+ * and Martian Mono, for the reason above. They are close enough in
  * proportion that the card reads as the same system at feed size, which is the
  * only size anyone sees it at.
  */
@@ -73,14 +73,12 @@ function oklchToHex(L, C, h) {
 }
 
 const C = {
-  paper: oklchToHex(0.975, 0.006, 70),
-  paper2: oklchToHex(0.95, 0.008, 70),
-  rule: oklchToHex(0.87, 0.008, 70),
-  faint: oklchToHex(0.58, 0.012, 62),
-  muted: oklchToHex(0.44, 0.013, 60),
-  ink: oklchToHex(0.2, 0.014, 60),
-  accent: oklchToHex(0.58, 0.16, 52),
-  inkDark: oklchToHex(0.94, 0.008, 70),
+  paper: oklchToHex(0.78, 0.14, 72),
+  ink: oklchToHex(0.19, 0.03, 55),
+  /** The safelight — the card is the site's opening amber field. */
+  field: oklchToHex(0.78, 0.14, 72),
+  onField: oklchToHex(0.19, 0.03, 55),
+  onFieldMuted: oklchToHex(0.3, 0.05, 56),
 };
 
 const DISPLAY = 'Helvetica Neue, Helvetica, Arial, sans-serif';
@@ -155,64 +153,62 @@ const PAD = 72;
 const CONTENT_WIDTH = WIDTH - PAD * 2;
 
 /**
- * One card template for every page type.
+ * One card template for every page type: the site's safelight field.
  *
- * The structure mirrors the site: an accent rule at the top edge, a mono
- * metadata rail, one large statement, and a hairline separating the statement
- * from the footer rail. A recruiter who has seen the site should recognise the
- * card without reading it.
+ * Mono filing line at the top, the statement in heavy white type, a white rule
+ * and a footer rail — the same field and spec-sheet grammar the home page opens
+ * with, so a recruiter who has seen the site recognises the card unread.
  */
 function card({ eyebrow, title, summary, footer }) {
   // Longer titles step down through three sizes rather than wrapping to five
-  // lines — the card is read at thumbnail size, where line count hurts more
-  // than point size does.
-  const titleSize = title.length > 78 ? 54 : title.length > 44 ? 64 : 76;
+  // lines — the card is read at thumbnail size.
+  const titleSize = title.length > 78 ? 56 : title.length > 44 ? 68 : 84;
   const titleLines = wrap(title, { fontSize: titleSize, maxWidth: CONTENT_WIDTH, maxLines: 3 });
   const summaryLines = summary
     ? wrap(summary, { fontSize: 26, maxWidth: CONTENT_WIDTH - 40, maxLines: 2 })
     : [];
 
-  const titleTop = 214;
-  const titleBlock = titleTop + titleLines.length * (titleSize * 1.12);
+  // Baseline of the first line: the cap height clears the rule at y=139.
+  const titleTop = 168 + titleSize * 0.8;
+  const titleBlock = titleTop + (titleLines.length - 1) * (titleSize * 1.02);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
-  <rect width="${WIDTH}" height="${HEIGHT}" fill="${C.paper}"/>
-  <rect width="${WIDTH}" height="10" fill="${C.accent}"/>
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="${C.field}"/>
 
-  <rect x="${PAD}" y="86" width="14" height="14" fill="${C.accent}"/>
+  <rect x="${PAD}" y="88" width="28" height="8" fill="${C.onField}"/>
   ${textLines([eyebrow.toUpperCase()], {
-    x: PAD + 30,
+    x: PAD + 44,
     y: 98,
     lineHeight: 0,
     'font-family': MONO,
     'font-size': 20,
     'letter-spacing': 2.4,
-    fill: C.faint,
+    fill: C.onFieldMuted,
   })}
 
-  <rect x="${PAD}" y="140" width="${CONTENT_WIDTH}" height="1.5" fill="${C.rule}"/>
+  <rect x="${PAD}" y="136" width="${CONTENT_WIDTH}" height="3" fill="${C.onField}"/>
 
   ${textLines(titleLines, {
     x: PAD,
     y: titleTop,
-    lineHeight: titleSize * 1.12,
+    lineHeight: titleSize * 1.02,
     'font-family': DISPLAY,
     'font-size': titleSize,
-    'font-weight': 600,
-    'letter-spacing': -titleSize * 0.03,
-    fill: C.ink,
+    'font-weight': 800,
+    'letter-spacing': -titleSize * 0.035,
+    fill: C.onField,
   })}
 
   ${textLines(summaryLines, {
     x: PAD,
-    y: titleBlock + 30,
+    y: titleBlock + 64,
     lineHeight: 38,
     'font-family': DISPLAY,
     'font-size': 26,
-    fill: C.muted,
+    fill: C.onFieldMuted,
   })}
 
-  <rect x="${PAD}" y="${HEIGHT - 116}" width="${CONTENT_WIDTH}" height="1.5" fill="${C.rule}"/>
+  <rect x="${PAD}" y="${HEIGHT - 116}" width="${CONTENT_WIDTH}" height="1.5" fill="${C.onFieldMuted}"/>
   ${textLines([footer.toUpperCase()], {
     x: PAD,
     y: `${HEIGHT - 68}`,
@@ -220,7 +216,7 @@ function card({ eyebrow, title, summary, footer }) {
     'font-family': MONO,
     'font-size': 20,
     'letter-spacing': 2,
-    fill: C.muted,
+    fill: C.onField,
   })}
   ${textLines(['CABRIALESDEV.NETLIFY.APP'], {
     x: WIDTH - PAD,
@@ -230,7 +226,7 @@ function card({ eyebrow, title, summary, footer }) {
     'font-family': MONO,
     'font-size': 20,
     'letter-spacing': 2,
-    fill: C.faint,
+    fill: C.onFieldMuted,
   })}
 </svg>`;
 }
@@ -259,15 +255,15 @@ async function writePng(svg, relativePath) {
  * `padding` exists for the maskable variant: Android crops icons to whatever
  * shape the launcher uses, and anything inside the outer 10% can be cut.
  */
-function iconSvg({ size, padding = 0.14, background = C.paper }) {
+function iconSvg({ size, padding = 0.14, background = C.ink }) {
   const inset = size * padding;
   const scale = (size - inset * 2) / 128;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <rect width="${size}" height="${size}" fill="${background}"/>
   <g transform="translate(${inset} ${inset}) scale(${scale})">
-    <path d="M22 102V26l42 50 42-50v76" stroke="${C.ink}" stroke-width="15" fill="none" stroke-linejoin="miter"/>
-    <circle cx="106" cy="102" r="11" fill="${C.accent}"/>
+    <path d="M22 102V26l42 50 42-50v76" stroke="${C.paper}" stroke-width="15" fill="none" stroke-linejoin="miter"/>
+    <rect x="88" y="94" width="30" height="12" fill="${C.paper}"/>
   </g>
 </svg>`;
 }

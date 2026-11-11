@@ -1,15 +1,21 @@
-/* Hallmark · genre: modern-minimal · theme: custom
- * vibe: precise, warm, engineered, quiet
- * paper  oklch(97.5% 0.006 70)  light  ·  oklch(15% 0.010 60)  dark
- * accent oklch(58%  0.160 52)   light  ·  oklch(70% 0.140 55)  dark
- * display Space Grotesk · body Newsreader · mono JetBrains Mono
- * axes: light paper-band / grotesk-sans display / warm accent
- * macrostructure: pending — chosen when the page is rebuilt against real CV content
+/* Darkroom
+ *
+ * A career worked like a darkroom session: every project goes through the
+ * same stations — build, ship, measure — and its result is a print that
+ * develops in front of you.
+ *
+ * light  safelight amber drenches the ground; deeproom brown is the ink
+ * dark   lights off: deeproom brown ground, amber ink
+ * prints silver-gray to enamel white — the only neutral tones on the page
+ * type   Archivo (extreme condensed caps for claims, normal for reading) ·
+ *        Martian Mono for labels, figures, dates and spec rows
+ * state  by development: fixed = full-contrast print, developing = flat,
+ *        low-contrast print with a dashed edge. No red anywhere.
  */
 
-@import '@fontsource-variable/space-grotesk';
-@import '@fontsource-variable/newsreader';
-@import '@fontsource-variable/jetbrains-mono';
+@import '@fontsource-variable/archivo/wdth.css';
+@import '@fontsource-variable/archivo/wdth-italic.css';
+@import '@fontsource-variable/martian-mono/wdth.css';
 @import 'tailwindcss';
 
 /* Tailwind v4 resolves `dark:` against prefers-color-scheme by default. The
@@ -22,7 +28,6 @@
  *
  * `@theme inline` emits utilities that point at `var(--…)` rather than copying
  * the value, so a single `.dark` block below re-points every utility at once.
- * Without `inline`, dark mode would need a duplicate utility set.
  * ------------------------------------------------------------------------ */
 @theme inline {
   --color-paper: var(--paper);
@@ -35,10 +40,13 @@
   --color-accent: var(--accent);
   --color-accent-text: var(--accent-text);
   --color-focus: var(--focus);
+  --color-field: var(--field);
+  --color-on-field: var(--on-field);
+  --color-on-field-muted: var(--on-field-muted);
 
-  --font-display: 'Space Grotesk Variable', ui-sans-serif, system-ui, sans-serif;
-  --font-body: 'Newsreader Variable', ui-serif, Georgia, serif;
-  --font-mono: 'JetBrains Mono Variable', ui-monospace, SFMono-Regular, monospace;
+  --font-display: 'Archivo Variable', 'Arial Narrow', ui-sans-serif, system-ui, sans-serif;
+  --font-body: 'Archivo Variable', ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'Martian Mono Variable', ui-monospace, SFMono-Regular, monospace;
 
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-in: cubic-bezier(0.7, 0, 0.84, 0);
@@ -46,27 +54,38 @@
 }
 
 /* ---------------------------------------------------------------------------
- * Palette — anchor hue ~60 (warm amber)
+ * Palette — safelight amber and deeproom brown
  *
- * Neutrals carry a trace of the anchor's chroma so the page reads warm rather
- * than flat grey. Contrast ratios against paper are noted where they constrain
- * usage. `--faint` clears AA for small text on paper and paper-2 in both themes,
- * because it carries dates, years and stack lists — but it stays the quietest step.
+ * Contrast is noted where it constrains use. Every text step clears WCAG AA
+ * (4.5:1) on both `paper` and `paper-2`, in both themes.
  * ------------------------------------------------------------------------ */
 :root {
   color-scheme: light;
 
-  --paper: oklch(97.5% 0.006 70); /* never #fff — tinted off-white */
-  --paper-2: oklch(95% 0.008 70); /* recessed wells, code blocks   */
-  --paper-3: oklch(92.5% 0.009 70); /* hover surface               */
-  --rule: oklch(87% 0.008 70); /* hairlines only                   */
-  --faint: oklch(53% 0.012 62); /* ~4.9:1 on paper, 4.6:1 on paper-2 — AA for small meta text */
-  --muted: oklch(44% 0.013 60); /* ~5.9:1 — safe for body copy      */
-  --ink: oklch(20% 0.014 60); /* ~14:1                              */
+  --paper: oklch(78% 0.14 72); /* safelight amber — the ground, everywhere */
+  --paper-2: oklch(74% 0.135 70); /* wells, code, hover */
+  --paper-3: oklch(69% 0.125 68);
+  --rule: oklch(50% 0.08 62); /* row hairlines; structure uses ink */
+  --faint: oklch(36% 0.06 58);
+  --muted: oklch(30% 0.05 56);
+  --ink: oklch(19% 0.03 55); /* deeproom brown, never #000 */
 
-  --accent: oklch(58% 0.16 52); /* marks, rules, fills — not text   */
-  --accent-text: oklch(48% 0.17 50); /* ~5.1:1 — links and inline    */
-  --focus: oklch(52% 0.19 52);
+  --accent: oklch(19% 0.03 55); /* fills and live marks are the ink itself */
+  --accent-text: oklch(19% 0.03 55);
+  --focus: oklch(19% 0.03 55);
+
+  /* The deeproom: dark bands that hold the prints. Amber on it reads 9:1+. */
+  --field: oklch(18% 0.025 55);
+  --on-field: oklch(80% 0.145 74);
+  --on-field-muted: oklch(70% 0.11 72);
+
+  /* Prints: silver gray up to enamel white. */
+  --print-hi: oklch(95% 0.008 85);
+  --print-lo: oklch(62% 0.006 80);
+  --print-ink: oklch(16% 0.004 80);
+
+  /* The safelight itself: a brighter pool the ground falls away from. */
+  --glow: oklch(86% 0.13 80);
 
   /* 4pt scale */
   --space-3xs: 0.25rem;
@@ -80,46 +99,65 @@
   --space-3xl: 6rem;
   --space-4xl: 8rem;
 
-  /* Fluid display sizes. Body steps stay fixed — fluid body text harms
-   * readability more than it helps. */
-  --text-display: clamp(2.75rem, 1.6rem + 5.2vw, 5.5rem);
-  --text-display-s: clamp(2rem, 1.4rem + 2.8vw, 3.5rem);
-  --text-title: clamp(1.5rem, 1.25rem + 1.2vw, 2.25rem);
+  /* Scale courage: claims jump to wall scale, annotations stay at 11px, and
+   * almost nothing lives in between. Body steps stay fixed. */
+  --text-wall: clamp(3.25rem, 0.6rem + 7.4vw, 8.75rem);
+  --text-claim: clamp(2rem, 1.1rem + 3.4vw, 4rem);
+  --text-display-s: clamp(2.25rem, 1.3rem + 3.6vw, 4.5rem);
+  --text-title: clamp(1.5rem, 1.2rem + 1.2vw, 2.25rem);
+
+  /* Archivo's width axis: claims set condensed, reading text at normal. */
+  --stretch-claim: 62%;
+  --stretch-title: 85%;
+  --stretch-mono: 87.5%;
 
   --dur-micro: 120ms;
   --dur-short: 220ms;
   --dur-long: 420ms;
+  --dur-draw: 1400ms;
+  --dur-develop: 2600ms;
 
   --rule-hair: 1px;
-  --radius-sm: 2px;
-  --radius-md: 4px;
+  --rule-heavy: 2px;
+  --radius-sm: 0;
+  --radius-md: 0;
+
+  --shell: 76rem;
+  --gutter: clamp(1rem, 4vw, 3rem);
 }
 
-/* Dark mode keeps the anchor hue and moves only lightness and chroma, per the
- * palette recipe — switching hue between modes reads as two different brands. */
+/* Lights off: the room goes dark and the safelight becomes the ink. */
 .dark {
   color-scheme: dark;
 
-  --paper: oklch(15% 0.01 60); /* never #000 */
-  --paper-2: oklch(18.5% 0.011 60);
-  --paper-3: oklch(22% 0.012 60); /* elevation by lightness, not shadow */
-  --rule: oklch(30% 0.01 60);
-  --faint: oklch(62% 0.011 60); /* ~5.4:1 on paper, 5.0:1 on paper-2 */
-  --muted: oklch(72% 0.009 62); /* ~7.2:1 */
-  --ink: oklch(94% 0.008 70); /* ~13.9:1 */
+  --paper: oklch(17% 0.02 55);
+  --paper-2: oklch(21% 0.024 55);
+  --paper-3: oklch(26% 0.028 55);
+  --rule: oklch(38% 0.05 60);
+  --faint: oklch(67% 0.1 70);
+  --muted: oklch(75% 0.12 72);
+  --ink: oklch(83% 0.145 75);
 
-  --accent: oklch(70% 0.14 55); /* lifted lightness, reduced chroma */
-  --accent-text: oklch(74% 0.13 55);
-  --focus: oklch(74% 0.15 55);
+  --accent: oklch(80% 0.15 74);
+  --accent-text: oklch(83% 0.145 75);
+  --focus: oklch(83% 0.145 75);
+
+  --field: oklch(11% 0.012 55);
+  --on-field: oklch(83% 0.145 75);
+  --on-field-muted: oklch(70% 0.11 72);
+
+  --print-hi: oklch(88% 0.008 85);
+  --print-lo: oklch(52% 0.006 80);
+
+  --glow: oklch(24% 0.06 60);
 }
 
 @layer base {
   html {
     font-family: var(--font-body);
-    /* Opt out of smooth scroll for users who asked motion to stop — the
-     * unguarded `scroll-behavior: smooth` in the previous build was a
-     * vestibular trigger with no escape hatch. */
     scroll-behavior: smooth;
+    /* Sticky header is 3.5rem; anchored sections land below it. */
+    scroll-padding-block-start: 4.5rem;
     -webkit-text-size-adjust: 100%;
   }
 
@@ -133,15 +171,9 @@
     background-color: var(--color-paper);
     color: var(--color-ink);
     font-size: 1rem;
-    line-height: 1.65;
+    line-height: 1.6;
     -webkit-font-smoothing: antialiased;
     text-rendering: optimizeLegibility;
-  }
-
-  /* Light text on dark surfaces reads optically heavier; drop the body weight
-   * to compensate so dark mode doesn't look bolder than light. */
-  .dark body {
-    font-weight: 350;
   }
 
   h1,
@@ -151,12 +183,14 @@
   h5,
   h6 {
     font-family: var(--font-display);
-    font-weight: 600;
-    font-style: normal; /* headings are roman — never italic */
-    line-height: 1.08;
+    font-weight: 700;
+    font-stretch: var(--stretch-title);
+    font-style: normal;
+    line-height: 1.02;
     letter-spacing: -0.02em;
+    /* Condensed widths close word gaps; reopen them. */
+    word-spacing: 0.08em;
     text-wrap: balance;
-    /* Long unbroken tokens (URLs, PascalCase) must not force a scrollbar. */
     overflow-wrap: anywhere;
     min-width: 0;
   }
@@ -165,8 +199,8 @@
     text-wrap: pretty;
   }
 
-  /* Dates, durations and any column of figures align only with lining
-   * tabular figures — Newsreader ships proportional oldstyle by default. */
+  /* Dates, durations and any column of figures align only with tabular
+   * lining figures. */
   time,
   .tabular {
     font-variant-numeric: tabular-nums lining-nums;
@@ -177,15 +211,15 @@
   pre,
   samp {
     font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
     font-feature-settings: 'liga' 0;
   }
 
-  /* Rings appear instantly and are never transitioned — an animated ring
-   * leaves keyboard users with no indicator during the fade. */
+  /* Rings appear instantly and are never transitioned. Square, like
+   * everything else here. */
   :focus-visible {
     outline: 2px solid var(--color-focus);
-    outline-offset: 2px;
-    border-radius: var(--radius-sm);
+    outline-offset: 3px;
   }
 
   :focus:not(:focus-visible) {
@@ -193,32 +227,41 @@
   }
 
   ::selection {
-    background-color: var(--color-accent);
+    background-color: var(--color-ink);
     color: var(--color-paper);
   }
 
   ::placeholder {
-    color: var(--color-muted);
+    color: var(--color-faint);
+  }
+
+  /* Browser surfaces carry the world too. */
+  html {
+    scrollbar-color: var(--color-ink) var(--color-paper-2);
+    accent-color: var(--color-accent);
+    caret-color: var(--color-accent);
   }
 }
 
 /* ---------------------------------------------------------------------------
- * Page-load orchestration — one sequence, staggered in CSS by DOM index.
- * No IntersectionObserver, no scroll listener, no JS.
+ * Shared utilities
  * ------------------------------------------------------------------------ */
 @layer utilities {
-  .reveal {
-    opacity: 0;
-    transform: translateY(8px);
-    animation: reveal var(--dur-long) var(--ease-out) forwards;
-    animation-delay: calc(var(--i, 0) * 60ms);
+  /* Mono annotation — the only small voice on the page. */
+  .annot {
+    font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    line-height: 1.4;
   }
 
-  @keyframes reveal {
-    to {
-      opacity: 1;
-      transform: none;
-    }
+  /* Breaks a block out of the shell to the full viewport width. */
+  .bleed {
+    inline-size: 100vw;
+    margin-inline: calc(50% - 50vw);
   }
 }
 
@@ -230,14 +273,67 @@
   *,
   *::before,
   *::after {
-    animation-duration: 150ms !important;
+    animation-duration: 1ms !important;
+    animation-delay: 0ms !important;
     animation-iteration-count: 1 !important;
     transition-duration: 150ms !important;
   }
-
-  /* Spatial motion collapses to a crossfade — the content still arrives. */
-  .reveal {
-    transform: none;
-    animation-delay: 0ms;
-  }
 }
+
+/* Hallmark · editorial · user screenshot reference · cream / terracotta
+ * pre-emit critique: P5 H5 E4 S4 R5 V4 */
+:root {
+  --paper: #f7f5ee;
+  --paper-2: #efede5;
+  --paper-3: #e7e3d9;
+  --rule: #dfdcd2;
+  --faint: #69665f;
+  --muted: #514f49;
+  --ink: #252521;
+  --accent: #a84027;
+  --accent-text: #a13b24;
+  --focus: #a84027;
+  --field: #eeebe2;
+  --on-field: #252521;
+  --on-field-muted: #514f49;
+  --glow: #f7f5ee;
+  --dot: #d9d5ca;
+  --card: #fffefa;
+  --number: #ece9e1;
+  --print-hi: #fffefa;
+  --print-lo: #e7e3d9;
+  --print-ink: #252521;
+  --font-display: 'Iowan Old Style', 'Palatino Linotype', 'Book Antiqua', Georgia, serif;
+  --stretch-claim: 100%;
+  --stretch-title: 100%;
+  --shell: 64rem;
+  --gutter: clamp(1.25rem, 5vw, 3rem);
+  --text-wall: clamp(2.75rem, 6vw, 5rem);
+  --text-claim: clamp(1.75rem, 3vw, 2.5rem);
+  --text-display-s: clamp(2.25rem, 5vw, 4rem);
+  --rule-heavy: 1px;
+}
+.dark {
+  --paper: #222320;
+  --paper-2: #2c2d28;
+  --paper-3: #383932;
+  --ink: #f1eee4;
+  --muted: #ccc7ba;
+  --faint: #b1ac9f;
+  --rule: #45463d;
+  --accent: #e39a7e;
+  --accent-text: #eaa88e;
+  --focus: #e39a7e;
+  --field: #2c2d28;
+  --on-field: #f1eee4;
+  --on-field-muted: #ccc7ba;
+  --glow: #222320;
+  --dot: #3d3e36;
+  --card: #2a2b26;
+  --number: #30312b;
+}
+body {
+  background-image: radial-gradient(var(--dot) 0.65px, transparent 0.65px);
+  background-size: 18px 18px;
+}
+h1, h2, h3, h4, h5, h6 { word-spacing: normal; }

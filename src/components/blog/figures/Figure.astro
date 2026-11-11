@@ -10,6 +10,8 @@
  * at ~5px on a phone. The figure scrolls sideways inside itself instead, so
  * the page body never does.
  */
+import Arrow from '@/components/ui/Arrow.astro';
+
 interface Props {
   title: string;
   subtitle?: string | undefined;
@@ -33,6 +35,13 @@ const { title, subtitle, source, scroll = false } = Astro.props;
   >
     <slot />
   </div>
-  {scroll && <p class="fig__hint" aria-hidden="true">Scroll sideways →</p>}
+  {
+    scroll && (
+      <p class="fig__hint" aria-hidden="true">
+        Scroll sideways
+        <Arrow kind="next" />
+      </p>
+    )
+  }
   {source && <figcaption>{source}</figcaption>}
 </figure>

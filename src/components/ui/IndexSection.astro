@@ -1,37 +1,54 @@
 ---
 /**
- * One categorised block of the index.
+ * One section of the record.
  *
- * The mono label IS the heading — not an eyebrow sitting above a separate
- * display heading, and never a two-column tag-left/title-right head. On an
- * Index-First page the category label is genuinely structural, so it carries
- * the `<h2>` itself rather than decorating one.
+ * Opens on a 2px ink rule. With a `claim`, the section leads with that claim as
+ * its heading — one large sentence that states the point before any detail.
+ * The short `label` is then not rendered: the claim carries the section. Without a claim, the label itself is the
+ * heading, set small (secondary sections: related reading, 404 lists).
  */
+import Arrow from '@/components/ui/Arrow.astro';
 
 interface Props {
-  /** Section label. Rendered uppercase; write it in sentence case. */
+  /** Short filing tag, e.g. "Work". Rendered uppercase mono. */
   label: string;
-  /** Anchor target, also used by the skip-link and any future nav. */
+  /** Anchor target. */
   id: string;
-  /**
-   * Optional right-aligned affordance, e.g. "All posts →".
-   * `| undefined` is explicit because `strictest` enables
-   * `exactOptionalPropertyTypes`, so passing a possibly-undefined value to a
-   * bare `?:` prop is an error.
-   */
+  /** The section's point, as one sentence. Becomes the h2. */
+  claim?: string | undefined;
+  /** Optional right-aligned affordance, e.g. "All posts →". */
   action?: { label: string; href: string } | undefined;
+  /** Sits directly under a dark band: less space above. */
+  tight?: boolean | undefined;
 }
 
-const { label, id, action } = Astro.props;
+const { label, id, claim, action, tight = false } = Astro.props;
+
+// Callers may write "All posts →"; the glyph is dropped and the drawn arrow
+// takes its place, so every arrow on the site is the same authored mark.
+const actionLabel = action?.label.replace(/\s*[→↗]\s*$/u, '');
 ---
 
-<section id={id} class="index-section">
-  <div class="index-section__head">
-    <h2 class="index-section__label">{label}</h2>
+<section id={id} class:list={['section', { 'section--claim': claim, 'section--tight': tight }]} aria-labelledby={`${id}-heading`}>
+  <div class="section__head">
+    {
+      claim ? (
+        <>
+          <h2 id={`${id}-heading`} class="section__claim">
+            {claim}
+          </h2>
+        </>
+      ) : (
+        <h2 id={`${id}-heading`} class="section__label annot">
+          {label}
+        </h2>
+      )
+    }
     {
       action && (
-        <a class="index-section__action" href={action.href}>
-          {action.label}
+        <a class="section__action annot" href={action.href}>
+          {actionLabel}
+          <Arrow kind="next" />
         </a>
       )
     }
@@ -40,43 +57,61 @@ const { label, id, action } = Astro.props;
 </section>
 
 <style>
-  .index-section {
-    /* Deliberately uneven: sections breathe more above than below, so each
-     * label reads as opening a block rather than floating between two. */
-    padding-block-start: var(--space-3xl);
-    padding-block-end: var(--space-lg);
+  .section {
+    padding-block: var(--space-3xl) var(--space-lg);
   }
 
-  .index-section__head {
+  .section--tight {
+    padding-block-start: var(--space-md);
+  }
+
+  .section__head {
     display: flex;
     align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-md);
-    padding-block-end: var(--space-sm);
-    border-block-end: var(--rule-hair) solid var(--color-ink);
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-md);
+    padding-block-start: var(--space-sm);
+    border-block-start: var(--rule-heavy) solid var(--color-ink);
   }
 
-  .index-section__label {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-weight: 500;
-    letter-spacing: 0.14em;
+  .section__claim {
+    word-spacing: 0.14em;
     text-transform: uppercase;
-    line-height: 1;
+    flex: 1 1 32rem;
+    font-size: var(--text-claim);
+    font-weight: 800;
+    font-stretch: var(--stretch-claim);
+    line-height: 0.95;
+    letter-spacing: -0.03em;
+    max-inline-size: 22ch;
+  }
+
+  .section__label {
     color: var(--color-ink);
   }
 
-  .index-section__action {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    letter-spacing: 0.04em;
-    color: var(--color-muted);
-    text-decoration: none;
-    /* Never wraps to two lines — a broken-looking affordance reads as a bug. */
+  .section__label {
+    flex: 1 1 auto;
+  }
+
+  .section__action {
+    display: inline-flex;
+    align-items: center;
+    margin-inline-start: auto;
+    color: var(--color-ink);
+    text-decoration: underline;
+    text-underline-offset: 0.3em;
     white-space: nowrap;
     transition: color var(--dur-micro) var(--ease-out);
   }
-  .index-section__action:hover {
+  .section__action:hover {
     color: var(--color-accent-text);
+  }
+
+  /* Wide screens: the action takes the right end of the rule. */
+  @media (min-width: 48rem) {
+    .section--claim .section__action {
+      margin-inline-start: auto;
+    }
   }
 </style>

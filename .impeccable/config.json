@@ -1,0 +1,62 @@
+{
+  "detector": {
+    "ignoreRules": [],
+    "ignoreFiles": [],
+    "ignoreValues": [
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/rating-plate.html"
+        ],
+        "createdAt": "2026-11-11T10:01:12.826Z",
+        "reason": "model: throwaway decision sketch for a replacement world; fonts are placeholders, not the DESIGN.md system"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/annual-report.html"
+        ],
+        "createdAt": "2026-11-11T10:01:12.882Z",
+        "reason": "model: throwaway decision sketch for a replacement world; fonts are placeholders, not the DESIGN.md system"
+      },
+      {
+        "rule": "design-system-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/darkroom.html"
+        ],
+        "createdAt": "2026-11-11T10:01:12.926Z",
+        "reason": "model: throwaway decision sketch for a replacement world; fonts are placeholders, not the DESIGN.md system"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/rating-plate.html"
+        ],
+        "createdAt": "2026-11-11T10:02:12.832Z",
+        "reason": "model: throwaway decision sketch; Arial is a placeholder, the build sets the world's real faces"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/annual-report.html"
+        ],
+        "createdAt": "2026-11-11T10:02:12.877Z",
+        "reason": "model: throwaway decision sketch; Arial is a placeholder, the build sets the world's real faces"
+      },
+      {
+        "rule": "overused-font",
+        "value": "*",
+        "files": [
+          ".impeccable/mocks/decision/darkroom.html"
+        ],
+        "createdAt": "2026-11-11T10:02:12.917Z",
+        "reason": "model: throwaway decision sketch; Arial is a placeholder, the build sets the world's real faces"
+      }
+    ]
+  }
+}

@@ -83,10 +83,15 @@ const canonical = canonicalUrl(Astro.url);
 <style>
   .intro {
     padding-block: var(--space-2xl) var(--space-lg);
+    border-block-end: var(--rule-heavy) solid var(--color-ink);
   }
 
   .intro__title {
-    font-size: var(--text-display-s);
+    font-size: var(--text-wall);
+    font-weight: 800;
+    font-stretch: var(--stretch-claim);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
   }
 
   .intro__lede {
@@ -103,6 +108,7 @@ const canonical = canonicalUrl(Astro.url);
     flex-wrap: wrap;
     gap: var(--space-2xs) var(--space-sm);
     font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
     font-size: 0.75rem;
   }
 

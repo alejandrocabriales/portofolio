@@ -1,26 +1,27 @@
 ---
-import type { GetStaticPaths } from "astro";
+import type { GetStaticPaths } from 'astro';
 
-import Layout from "@/layouts/Layout.astro";
-import Shell from "@/components/layout/Shell.astro";
-import IndexSection from "@/components/ui/IndexSection.astro";
-import IndexRow from "@/components/ui/IndexRow.astro";
-import ContactNudge from "@/components/ui/ContactNudge.astro";
+import Layout from '@/layouts/Layout.astro';
+import Shell from '@/components/layout/Shell.astro';
+import IndexSection from '@/components/ui/IndexSection.astro';
+import IndexRow from '@/components/ui/IndexRow.astro';
+import ContactNudge from '@/components/ui/ContactNudge.astro';
+import Arrow from '@/components/ui/Arrow.astro';
 
-import { PROJECTS, type Project } from "@/data/projects";
-import { SITE } from "@/config/site";
-import { canonicalUrl, ogImagePathFor } from "@/lib/seo";
-import { breadcrumbNode, projectNode } from "@/lib/schema";
+import { PROJECTS, type Project } from '@/data/projects';
+import { SITE } from '@/config/site';
+import { canonicalUrl, ogImagePathFor } from '@/lib/seo';
+import { breadcrumbNode, projectNode } from '@/lib/schema';
 
 /** One case study per project. */
 export const getStaticPaths: GetStaticPaths = () =>
-    PROJECTS.map((project) => ({
-        params: { slug: project.slug },
-        props: { project },
-    }));
+  PROJECTS.map((project) => ({
+    params: { slug: project.slug },
+    props: { project },
+  }));
 
 interface Props {
-    project: Project;
+  project: Project;
 }
 
 const { project } = Astro.props;
@@ -31,9 +32,9 @@ const canonical = canonicalUrl(Astro.url);
 
 /** Mirrors the visible breadcrumb exactly — the two must not disagree. */
 const crumbs = breadcrumbNode(canonical, [
-    { name: "Home", path: "/" },
-    { name: "Work", path: "/#work" },
-    { name: project.name },
+  { name: 'Home', path: '/' },
+  { name: 'Work', path: '/#work' },
+  { name: project.name },
 ]);
 
 /**
@@ -42,237 +43,297 @@ const crumbs = breadcrumbNode(canonical, [
  * click that "Asset and investment management platform" does not.
  */
 const description = project.impact
-    ? `${project.summary} ${project.impact} Built at ${project.context}, ${project.year}.`
-    : `${project.summary} Built at ${project.context}, ${project.year}.`;
+  ? `${project.summary} ${project.impact} Built at ${project.context}, ${project.year}.`
+  : `${project.summary} Built at ${project.context}, ${project.year}.`;
+
+/** Full title when it fits the 70-character budget; otherwise the context drops. */
+const fullTitle = `${project.name} — ${project.context} — ${SITE.shortName}`;
+const title = fullTitle.length <= 70 ? fullTitle : `${project.name} — ${SITE.shortName}`;
+
+/** The case study's own spec sheet: what a reader checks before reading. */
+const sheet = [
+  { label: 'Client', value: project.context },
+  { label: 'Year', value: project.year },
+  { label: 'Stack', value: project.stack.join(', ') },
+];
 ---
 
 <Layout
-    title={`${project.name} — ${project.context} — ${SITE.shortName}`}
-    description={description}
-    image={ogImagePathFor("work", project.slug)}
-    imageAlt={`${project.name} — case study by ${SITE.name}`}
-    ogType="article"
-    breadcrumbId={`${canonical}#breadcrumb`}
-    schema={[crumbs, projectNode(project, canonical)]}
+  title={title}
+  description={description}
+  image={ogImagePathFor('work', project.slug)}
+  imageAlt={`${project.name} — case study by ${SITE.name}`}
+  ogType="article"
+  breadcrumbId={`${canonical}#breadcrumb`}
+  schema={[crumbs, projectNode(project, canonical)]}
 >
-    <Shell>
-        <main id="main">
-            <nav class="crumb" aria-label="Breadcrumb">
-                <a href="/">Home</a>
-                <span aria-hidden="true">/</span>
-                <a href="/#work">Work</a>
-                <span aria-hidden="true">/</span>
-                <span aria-current="page">{project.name}</span>
+  <Shell>
+    <main id="main">
+      <article>
+        <!-- The case study opens in the deeproom, like the home page contact sheet: the
+          project name at claim scale, its spec sheet beside it. -->
+        <header class="study bleed">
+          <div class="study__inner">
+            <nav class="study__crumb annot" aria-label="Breadcrumb">
+              <a href="/">Home</a>
+              <span aria-hidden="true">/</span>
+              <a href="/#work">Work</a>
+              <span aria-hidden="true">/</span>
+              <span aria-current="page">{project.name}</span>
             </nav>
 
-            <article>
-                <header class="study">
-                    <h1 class="study__title">{project.name}</h1>
-                    <p class="study__context">
-                        {project.context} · {project.year}
-                    </p>
-                    <p class="study__summary">{project.summary}</p>
+            <div class="study__grid">
+              <div>
+                <h1 class="study__title">{project.name}</h1>
+                <p class="study__summary">{project.summary}</p>
+              </div>
 
-                    {
-                        project.impact && (
-                            <p class="study__impact">
-                                <span
-                                    class="study__impact-mark"
-                                    aria-hidden="true"
-                                />
-                                {project.impact}
-                            </p>
-                        )
-                    }
-                </header>
-
-                <div class="study__body">
-                    <section class="block">
-                        <h2>The problem</h2>
-                        <p>{project.problem}</p>
-                    </section>
-
-                    <section class="block">
-                        <h2>What I did</h2>
-                        <p>{project.contribution}</p>
-                    </section>
-
-                    <section class="block">
-                        <h2>Built with</h2>
-                        <ul class="study__stack">
-                            {project.stack.map((tool) => <li>{tool}</li>)}
-                        </ul>
-                    </section>
-
-                    {
-                        (project.url || project.repo || project.writeup) && (
-                            <section class="block">
-                                <h2>Links</h2>
-                                <ul class="study__links">
-                                    {project.writeup && (
-                                        <li>
-                                            <a href={project.writeup}>
-                                                Full write-up
-                                            </a>
-                                        </li>
-                                    )}
-                                    {project.url && (
-                                        <li>
-                                            <a
-                                                href={project.url}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                Live site
-                                            </a>
-                                        </li>
-                                    )}
-                                    {project.repo && (
-                                        <li>
-                                            <a
-                                                href={project.repo}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                            >
-                                                Source
-                                            </a>
-                                        </li>
-                                    )}
-                                </ul>
-                            </section>
-                        )
-                    }
-                </div>
-            </article>
-
-            <ContactNudge line="Working on something with the same shape?" />
-
-            <IndexSection
-                label="Other work"
-                id="other"
-                action={{ label: "All work →", href: "/#work" }}
-            >
+              <dl class="study__sheet">
                 {
-                    others.map((other) => (
-                        <IndexRow
-                            title={other.name}
-                            subtitle={other.context}
-                            description={other.summary}
-                            meta={other.year}
-                            href={`/work/${other.slug}/`}
-                        />
-                    ))
+                  sheet.map((row) => (
+                    <div class="study__row">
+                      <dt class="annot">{row.label}</dt>
+                      <dd>{row.value}</dd>
+                    </div>
+                  ))
                 }
-            </IndexSection>
-        </main>
-    </Shell>
+                {
+                  project.impact && (
+                    <div class="study__impact">
+                      <dt class="annot">Measured</dt>
+                      <dd>{project.impact}</dd>
+                    </div>
+                  )
+                }
+              </dl>
+            </div>
+          </div>
+        </header>
+
+        <div class="body">
+          <section class="block">
+            <h2 class="block__label annot">The problem</h2>
+            <p class="block__text">{project.problem}</p>
+          </section>
+
+          <section class="block">
+            <h2 class="block__label annot">What I did</h2>
+            <p class="block__text">{project.contribution}</p>
+          </section>
+
+          {
+            (project.url || project.repo || project.writeup) && (
+              <section class="block">
+                <h2 class="block__label annot">Links</h2>
+                <ul class="block__links">
+                  {project.writeup && (
+                    <li>
+                      <a href={project.writeup}>
+                        Full write-up
+                        <Arrow kind="next" />
+                      </a>
+                    </li>
+                  )}
+                  {project.url && (
+                    <li>
+                      <a href={project.url} target="_blank" rel="noopener noreferrer">
+                        Live site
+                        <Arrow kind="out" />
+                      </a>
+                    </li>
+                  )}
+                  {project.repo && (
+                    <li>
+                      <a href={project.repo} target="_blank" rel="noopener noreferrer">
+                        Source
+                        <Arrow kind="out" />
+                      </a>
+                    </li>
+                  )}
+                </ul>
+              </section>
+            )
+          }
+        </div>
+      </article>
+
+      <ContactNudge line="Working on something with the same shape?" />
+
+      <IndexSection label="Other work" id="other" action={{ label: 'All work →', href: '/#work' }}>
+        {
+          others.map((other) => (
+            <IndexRow
+              title={other.name}
+              subtitle={other.context}
+              description={other.summary}
+              meta={other.year}
+              href={`/work/${other.slug}/`}
+            />
+          ))
+        }
+      </IndexSection>
+    </main>
+  </Shell>
 </Layout>
 
 <style>
-    .crumb {
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs);
-        padding-block-start: var(--space-xl);
-        font-family: var(--font-mono);
-        font-size: 0.75rem;
-        color: var(--color-faint);
-    }
-    .crumb a {
-        color: var(--color-muted);
-        text-decoration: none;
-        white-space: nowrap;
-    }
-    .crumb a:hover {
-        color: var(--color-accent-text);
-    }
+  /* ---- deeproom header ---------------------------------------------------- */
+  .study {
+    background-color: var(--color-field);
+    color: var(--color-on-field);
+  }
 
-    .study {
-        padding-block: var(--space-xl) var(--space-lg);
-    }
+  .study__inner {
+    max-inline-size: var(--shell);
+    margin-inline: auto;
+    padding: var(--space-md) var(--gutter) var(--space-xl);
+  }
 
-    .study__title {
-        font-size: var(--text-display-s);
-        letter-spacing: -0.03em;
-    }
+  .study__crumb {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2xs);
+    color: var(--color-on-field-muted);
+  }
+  .study__crumb a {
+    color: var(--color-on-field);
+    text-underline-offset: 0.3em;
+  }
 
-    /* Attribution under the title, not a kicker above it: the name is what
-     * the reader came for, the client is what qualifies it. */
-    .study__context {
-        margin-block-start: var(--space-2xs);
-        font-family: var(--font-mono);
-        font-size: 0.8125rem;
-        color: var(--color-muted);
-    }
+  .study__grid {
+    margin-block-start: var(--space-2xl);
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(18rem, 24rem);
+    align-items: end;
+    gap: var(--space-xl);
+  }
 
+  .study__title {
+    word-spacing: 0.14em;
+    text-transform: uppercase;
+    font-size: var(--text-wall);
+    font-weight: 800;
+    font-stretch: var(--stretch-claim);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+  }
 
-    .study__summary {
-        margin-block-start: var(--space-md);
-        max-inline-size: 58ch;
-        font-size: 1.125rem;
-        color: var(--color-muted);
-    }
+  .study__summary {
+    margin-block-start: var(--space-md);
+    max-inline-size: 48ch;
+    font-size: 1.1875rem;
+    line-height: 1.45;
+    color: var(--color-on-field);
+  }
 
-    .study__impact {
-        display: inline-flex;
-        align-items: baseline;
-        gap: var(--space-2xs);
-        margin-block-start: var(--space-md);
-        padding: var(--space-2xs) var(--space-sm);
-        border: var(--rule-hair) solid var(--color-rule);
-        border-radius: var(--radius-md);
-        font-family: var(--font-mono);
-        font-size: 0.8125rem;
-        color: var(--color-ink);
-    }
+  .study__sheet {
+    margin: 0;
+    border: var(--rule-heavy) solid var(--color-on-field);
+  }
 
-    .study__impact-mark {
-        inline-size: 0.5rem;
-        block-size: 0.5rem;
-        flex: none;
-        background-color: var(--color-accent);
-    }
+  .study__row,
+  .study__impact {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: var(--space-sm);
+    align-items: baseline;
+    padding: var(--space-xs) var(--space-sm);
+  }
 
-    .study__body {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-xl);
-        padding-block-start: var(--space-lg);
-        border-block-start: var(--rule-hair) solid var(--color-ink);
-    }
+  .study__row {
+    border-block-end: var(--rule-hair) solid color-mix(in oklab, var(--color-on-field) 45%, transparent);
+  }
 
-    .block h2 {
-        font-family: var(--font-mono);
-        font-size: 0.6875rem;
-        font-weight: 500;
-        letter-spacing: 0.16em;
-        text-transform: uppercase;
-        color: var(--color-faint);
-    }
+  .study__row dt,
+  .study__impact dt {
+    color: var(--color-on-field-muted);
+  }
 
-    .block p {
-        margin-block-start: var(--space-2xs);
-        max-inline-size: 64ch;
-        font-size: 1.0625rem;
-        line-height: 1.7;
-    }
+  .study__row dd,
+  .study__impact dd {
+    margin: 0;
+    font-size: 0.9375rem;
+    font-weight: 500;
+    line-height: 1.4;
+  }
 
-    .study__stack,
-    .study__links {
-        margin-block-start: var(--space-2xs);
-        display: flex;
-        flex-wrap: wrap;
-        gap: var(--space-2xs) var(--space-md);
-        list-style: none;
-        padding: 0;
-        font-family: var(--font-mono);
-        font-size: 0.8125rem;
-        color: var(--color-muted);
-    }
+  /* The measured outcome is the sheet's solid amber block. */
+  .study__impact {
+    background-color: var(--color-on-field);
+    color: var(--color-field);
+  }
+  .study__impact dt {
+    color: var(--color-field);
+  }
+  .study__impact dd {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-title);
+    font-size: 1.375rem;
+    font-weight: 800;
+    line-height: 1.1;
+  }
 
-    .study__links a {
-        color: var(--color-accent-text);
-        text-decoration: underline;
-        text-underline-offset: 0.25em;
+  .study :focus-visible {
+    outline-color: var(--color-on-field);
+  }
+
+  /* ---- body: ruled rows, label column ------------------------------------ */
+  .body {
+    padding-block-start: var(--space-xl);
+  }
+
+  .block {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 1fr);
+    gap: var(--space-md) var(--space-xl);
+    padding-block: var(--space-lg);
+    border-block-start: var(--rule-heavy) solid var(--color-ink);
+  }
+
+  .block__label {
+    color: var(--color-ink);
+  }
+
+  .block__text {
+    max-inline-size: 64ch;
+    font-size: 1.125rem;
+    line-height: 1.65;
+  }
+
+  .block__links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-xs) var(--space-lg);
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-title);
+    font-size: 1.375rem;
+    font-weight: 800;
+  }
+
+  .block__links a {
+    display: inline-flex;
+    align-items: center;
+    color: var(--color-accent-text);
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.2em;
+  }
+  .block__links a:hover {
+    text-decoration-thickness: 4px;
+  }
+
+  @media (max-width: 52rem) {
+    .study__grid {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-lg);
+      margin-block-start: var(--space-xl);
     }
+    .block {
+      grid-template-columns: minmax(0, 1fr);
+      gap: var(--space-xs);
+    }
+  }
 </style>

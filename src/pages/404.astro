@@ -70,15 +70,20 @@ import { SITE } from '@/config/site';
   }
 
   .lost__title {
-    font-size: var(--text-display-s);
-    letter-spacing: -0.03em;
+    font-size: var(--text-wall);
+    font-weight: 800;
+    font-stretch: var(--stretch-claim);
+    line-height: 0.86;
+    letter-spacing: -0.035em;
+    max-inline-size: 10ch;
   }
 
   /* The status code is metadata about the title, so it sits under it — and in
-   * graphite, not amber: nothing on this page is the one thing to look at. */
+   * muted ink, not full ink: nothing on this page is the one thing to look at. */
   .lost__code {
     margin-block-start: var(--space-2xs);
     font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
     font-size: 0.8125rem;
     color: var(--color-muted);
   }

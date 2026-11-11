@@ -113,6 +113,7 @@ const crumbs = breadcrumbNode(url, [
     gap: var(--space-2xs);
     padding-block-start: var(--space-xl);
     font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
     font-size: 0.75rem;
     color: var(--color-faint);
   }
@@ -136,7 +137,11 @@ const crumbs = breadcrumbNode(url, [
 
   .post-header__title {
     font-size: var(--text-display-s);
-    max-inline-size: 24ch;
+    font-weight: 800;
+    font-stretch: var(--stretch-claim);
+    line-height: 0.92;
+    letter-spacing: -0.03em;
+    max-inline-size: 20ch;
   }
 
   /* Date and reading time sit under the title, as PostMeta documents —
@@ -158,6 +163,7 @@ const crumbs = breadcrumbNode(url, [
     flex-wrap: wrap;
     gap: var(--space-2xs) var(--space-sm);
     font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
     font-size: 0.75rem;
   }
 
