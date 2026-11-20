@@ -24,7 +24,7 @@
     "@fontsource/kalam": "^5.3.0",
     "@sentry/astro": "^10.70.0",
     "@vercel/analytics": "^2.0.1",
-    "astro": "^7.4.7"
+    "astro": "^5.18.2"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.9",
