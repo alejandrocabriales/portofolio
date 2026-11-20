@@ -30,7 +30,7 @@ const actionLabel = action?.label.replace(/\s*[→↗]\s*$/u, '');
 ---
 
 <section id={id} class:list={['section', { 'section--claim': claim, 'section--tight': tight }]} aria-labelledby={`${id}-heading`}>
-  <div class="section__head">
+  <div class="section__head hand-rule">
     {
       claim ? (
         <>
@@ -76,13 +76,10 @@ const actionLabel = action?.label.replace(/\s*[→↗]\s*$/u, '');
 
   .section__claim {
     word-spacing: 0.14em;
-    text-transform: uppercase;
     flex: 1 1 32rem;
     font-size: var(--text-claim);
-    font-weight: 800;
-    font-stretch: var(--stretch-claim);
-    line-height: 0.95;
-    letter-spacing: -0.03em;
+    font-weight: 700;
+    line-height: 1.1;
     max-inline-size: 22ch;
   }
 

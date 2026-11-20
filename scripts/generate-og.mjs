@@ -20,8 +20,8 @@
  *
  * ## Typography
  *
- * Cards use the host's Helvetica Neue and Menlo rather than the site's Archivo
- * and Martian Mono, for the reason above. They are close enough in
+ * Cards use the host's Chalkboard SE, Helvetica Neue and Menlo rather than the
+ * site's Kalam, Archivo and Martian Mono, for the reason above. They are close enough in
  * proportion that the card reads as the same system at feed size, which is the
  * only size anyone sees it at.
  */
@@ -72,15 +72,22 @@ function oklchToHex(L, C, h) {
     .join('')}`;
 }
 
+/** Sketchbook palette — mirrors the final token block in global.css. */
 const C = {
-  paper: oklchToHex(0.78, 0.14, 72),
-  ink: oklchToHex(0.19, 0.03, 55),
-  /** The safelight — the card is the site's opening amber field. */
-  field: oklchToHex(0.78, 0.14, 72),
-  onField: oklchToHex(0.19, 0.03, 55),
-  onFieldMuted: oklchToHex(0.3, 0.05, 56),
+  paper: '#fdfcf9',
+  card: '#ffffff',
+  ink: '#1f1f1d',
+  muted: '#45433f',
+  orange: '#e8862e',
+  orangeFill: '#f7b77a',
+  mint: '#8fd3bd',
+  mintSoft: '#d4efe5',
 };
 
+void oklchToHex; // kept for future oklch tokens
+
+/** librsvg cannot load Kalam (WOFF2 only); Chalkboard SE is macOS's closest hand. */
+const HAND = 'Chalkboard SE, Comic Sans MS, Marker Felt, cursive';
 const DISPLAY = 'Helvetica Neue, Helvetica, Arial, sans-serif';
 const MONO = 'Menlo, DejaVu Sans Mono, monospace';
 
@@ -93,7 +100,7 @@ const MONO = 'Menlo, DejaVu Sans Mono, monospace';
  * rather than towards overflowing the card.
  * ------------------------------------------------------------------------ */
 
-const AVG_ADVANCE = { display: 0.5, mono: 0.6 };
+const AVG_ADVANCE = { display: 0.5, hand: 0.6, mono: 0.6 };
 
 function wrap(text, { fontSize, maxWidth, kind = 'display', maxLines = 3 }) {
   const perLine = Math.floor(maxWidth / (fontSize * AVG_ADVANCE[kind]));
@@ -153,80 +160,96 @@ const PAD = 72;
 const CONTENT_WIDTH = WIDTH - PAD * 2;
 
 /**
- * One card template for every page type: the site's safelight field.
+ * One card template for every page type: a hand-drawn notebook panel.
  *
- * Mono filing line at the top, the statement in heavy white type, a white rule
- * and a footer rail — the same field and spec-sheet grammar the home page opens
- * with, so a recruiter who has seen the site recognises the card unread.
+ * Orange marker pill for the filing line, the statement in handwriting, an
+ * orange squiggle beneath it, a dashed footer rail — the same sketchbook
+ * grammar the site uses, so the card is recognisable at feed size.
  */
 function card({ eyebrow, title, summary, footer }) {
-  // Longer titles step down through three sizes rather than wrapping to five
-  // lines — the card is read at thumbnail size.
-  const titleSize = title.length > 78 ? 56 : title.length > 44 ? 68 : 84;
-  const titleLines = wrap(title, { fontSize: titleSize, maxWidth: CONTENT_WIDTH, maxLines: 3 });
+  const titleSize = title.length > 78 ? 52 : title.length > 44 ? 62 : 78;
+  const titleLines = wrap(title, { fontSize: titleSize, maxWidth: CONTENT_WIDTH - 40, kind: 'hand', maxLines: 3 });
   const summaryLines = summary
-    ? wrap(summary, { fontSize: 26, maxWidth: CONTENT_WIDTH - 40, maxLines: 2 })
+    ? wrap(summary, { fontSize: 26, maxWidth: CONTENT_WIDTH - 80, maxLines: 2 })
     : [];
 
-  // Baseline of the first line: the cap height clears the rule at y=139.
-  const titleTop = 168 + titleSize * 0.8;
-  const titleBlock = titleTop + (titleLines.length - 1) * (titleSize * 1.02);
+  const titleTop = 200 + titleSize * 0.8;
+  const lineStep = titleSize * 1.15;
+  const titleBlock = titleTop + (titleLines.length - 1) * lineStep;
+  const lastLineWidth = Math.min(
+    CONTENT_WIDTH - 40,
+    titleLines.at(-1).length * titleSize * AVG_ADVANCE.hand * 0.92,
+  );
+  const sq = titleBlock + 26;
+
+  const pillWidth = Math.min(CONTENT_WIDTH - 40, eyebrow.length * 13.5 + 56);
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${WIDTH}" height="${HEIGHT}" viewBox="0 0 ${WIDTH} ${HEIGHT}">
-  <rect width="${WIDTH}" height="${HEIGHT}" fill="${C.field}"/>
+  <rect width="${WIDTH}" height="${HEIGHT}" fill="${C.paper}"/>
 
-  <rect x="${PAD}" y="88" width="28" height="8" fill="${C.onField}"/>
-  ${textLines([eyebrow.toUpperCase()], {
-    x: PAD + 44,
-    y: 98,
+  <!-- wobbly panel -->
+  <path d="M44 52 C300 40 800 46 1152 38 C1162 220 1158 460 1160 630 C820 640 380 634 50 640 C40 460 46 230 44 52 Z"
+    fill="${C.card}" stroke="${C.ink}" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- eyebrow pill -->
+  <path d="M${PAD + 4} 96 C${PAD + pillWidth * 0.4} 88 ${PAD + pillWidth * 0.8} 90 ${PAD + pillWidth} 94 C${PAD + pillWidth + 8} 110 ${PAD + pillWidth + 6} 130 ${PAD + pillWidth - 2} 142 C${PAD + pillWidth * 0.6} 148 ${PAD + pillWidth * 0.2} 146 ${PAD + 2} 144 C${PAD - 8} 128 ${PAD - 6} 108 ${PAD + 4} 96 Z"
+    fill="${C.orangeFill}"/>
+  ${textLines([eyebrow], {
+    x: PAD + 26,
+    y: 128,
     lineHeight: 0,
-    'font-family': MONO,
-    'font-size': 20,
-    'letter-spacing': 2.4,
-    fill: C.onFieldMuted,
+    'font-family': HAND,
+    'font-weight': 700,
+    'font-size': 24,
+    fill: C.ink,
   })}
 
-  <rect x="${PAD}" y="136" width="${CONTENT_WIDTH}" height="3" fill="${C.onField}"/>
+  <!-- sparks + mint dots -->
+  <path d="M1052 92l14-14M1062 116l20-4M1036 80l2-18" stroke="${C.orange}" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <circle cx="1000" cy="150" r="9" fill="${C.mint}" stroke="${C.ink}" stroke-width="3"/>
+  <circle cx="1060" cy="178" r="6" fill="${C.mint}" stroke="${C.ink}" stroke-width="3"/>
+  <circle cx="1028" cy="214" r="7" fill="${C.mint}" stroke="${C.ink}" stroke-width="3"/>
 
   ${textLines(titleLines, {
-    x: PAD,
+    x: PAD + 4,
     y: titleTop,
-    lineHeight: titleSize * 1.02,
-    'font-family': DISPLAY,
+    lineHeight: lineStep,
+    'font-family': HAND,
     'font-size': titleSize,
-    'font-weight': 800,
-    'letter-spacing': -titleSize * 0.035,
-    fill: C.onField,
+    'font-weight': 700,
+    fill: C.ink,
   })}
 
+  <path d="M${PAD} ${sq + 6} C${PAD + lastLineWidth * 0.3} ${sq - 4} ${PAD + lastLineWidth * 0.65} ${sq} ${PAD + lastLineWidth} ${sq - 6}"
+    stroke="${C.orange}" stroke-width="8" stroke-linecap="round" fill="none"/>
+
   ${textLines(summaryLines, {
-    x: PAD,
-    y: titleBlock + 64,
+    x: PAD + 4,
+    y: sq + 64,
     lineHeight: 38,
     'font-family': DISPLAY,
     'font-size': 26,
-    fill: C.onFieldMuted,
+    fill: C.muted,
   })}
 
-  <rect x="${PAD}" y="${HEIGHT - 116}" width="${CONTENT_WIDTH}" height="1.5" fill="${C.onFieldMuted}"/>
-  ${textLines([footer.toUpperCase()], {
-    x: PAD,
-    y: `${HEIGHT - 68}`,
+  <path d="M${PAD} ${HEIGHT - 128} H${WIDTH - PAD}" stroke="${C.ink}" stroke-opacity=".35" stroke-width="3" stroke-dasharray="10 9" stroke-linecap="round"/>
+  ${textLines([footer], {
+    x: PAD + 4,
+    y: `${HEIGHT - 82}`,
     lineHeight: 0,
-    'font-family': MONO,
-    'font-size': 20,
-    'letter-spacing': 2,
-    fill: C.onField,
+    'font-family': HAND,
+    'font-weight': 700,
+    'font-size': 24,
+    fill: C.ink,
   })}
-  ${textLines(['CABRIALESDEV.NETLIFY.APP'], {
+  ${textLines(['cabrialesdev.netlify.app'], {
     x: WIDTH - PAD,
-    y: `${HEIGHT - 68}`,
+    y: `${HEIGHT - 82}`,
     lineHeight: 0,
     'text-anchor': 'end',
     'font-family': MONO,
     'font-size': 20,
-    'letter-spacing': 2,
-    fill: C.onFieldMuted,
+    fill: C.muted,
   })}
 </svg>`;
 }
@@ -255,18 +278,22 @@ async function writePng(svg, relativePath) {
  * `padding` exists for the maskable variant: Android crops icons to whatever
  * shape the launcher uses, and anything inside the outer 10% can be cut.
  */
-function iconSvg({ size, padding = 0.14, background = C.ink }) {
+function iconSvg({ size, padding = 0.14, background = C.paper }) {
   const inset = size * padding;
   const scale = (size - inset * 2) / 128;
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
   <rect width="${size}" height="${size}" fill="${background}"/>
   <g transform="translate(${inset} ${inset}) scale(${scale})">
-    <path d="M22 102V26l42 50 42-50v76" stroke="${C.paper}" stroke-width="15" fill="none" stroke-linejoin="miter"/>
-    <rect x="88" y="94" width="30" height="12" fill="${C.paper}"/>
+${ICON_MARK}
   </g>
 </svg>`;
 }
+
+/** Shared with public/favicon.svg: mint blob, ink outline, hand-drawn M, orange tick. */
+const ICON_MARK = `    <path d="M14 18C46 10 84 12 114 16c6 30 4 64 2 96-32 6-70 4-100 2C10 82 10 48 14 18Z" fill="${C.mint}" stroke="${C.ink}" stroke-width="7" stroke-linejoin="round"/>
+    <path d="M34 92C36 70 38 52 40 36c8 14 16 28 24 40 8-14 16-28 26-42 2 18 2 38 4 58" fill="none" stroke="${C.ink}" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 104c22-4 46-4 70-2" fill="none" stroke="${C.orange}" stroke-width="7" stroke-linecap="round"/>`;
 
 /* ---------------------------------------------------------------------------
  * Sources

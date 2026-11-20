@@ -1,17 +1,12 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" fill="none">
-    <!-- Monogram mark. The amber bar is the safelight; the stroke is the deeproom ink — the same
-         short line that leads the nav wordmark, so the tab and the page agree. -->
-    <path
-        d="M22 102V26l42 50 42-50v76"
-        stroke="#1e130a"
-        stroke-width="15"
-        stroke-linejoin="miter"
-        stroke-linecap="butt"
-    />
-    <rect x="88" y="94" width="30" height="12" fill="#eea743" />
+    <!-- Sketchbook mark: mint marker blob, ink outline, hand-drawn M, orange underline.
+         Same paths as the raster icons in scripts/generate-og.mjs. -->
+    <path class="blob" d="M14 18C46 10 84 12 114 16c6 30 4 64 2 96-32 6-70 4-100 2C10 82 10 48 14 18Z" fill="#8fd3bd" stroke="#1f1f1d" stroke-width="7" stroke-linejoin="round"/>
+    <path class="m" d="M34 92C36 70 38 52 40 36c8 14 16 28 24 40 8-14 16-28 26-42 2 18 2 38 4 58" stroke="#1f1f1d" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>
+    <path d="M30 104c22-4 46-4 70-2" stroke="#e8862e" stroke-width="7" stroke-linecap="round"/>
     <style>
         @media (prefers-color-scheme: dark) {
-            path { stroke: #f0b04f; }
+            .blob { stroke: #f2efe6; }
         }
     </style>
 </svg>

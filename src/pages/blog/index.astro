@@ -34,7 +34,7 @@ const canonical = canonicalUrl(Astro.url);
   <Shell>
     <main id="main">
       <section class="intro">
-        <h1 class="intro__title">Writing</h1>
+        <h1 class="intro__title"><span class="hand-underline">Writing</span></h1>
         <p class="intro__lede">
           Notes on what I'm learning as I build — React and Next.js internals, Node
           and API design, architecture decisions I'd make differently now, and the
@@ -83,15 +83,13 @@ const canonical = canonicalUrl(Astro.url);
 <style>
   .intro {
     padding-block: var(--space-2xl) var(--space-lg);
-    border-block-end: var(--rule-heavy) solid var(--color-ink);
   }
 
   .intro__title {
     font-size: var(--text-wall);
-    font-weight: 800;
-    font-stretch: var(--stretch-claim);
-    line-height: 0.86;
-    letter-spacing: -0.035em;
+    font-weight: 700;
+    line-height: 1.05;
+    isolation: isolate;
   }
 
   .intro__lede {

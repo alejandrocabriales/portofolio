@@ -3,7 +3,7 @@ import { SITE, AVAILABILITY } from '@/config/site';
 ---
 <section class="masthead" aria-labelledby="masthead-title">
   <div class="masthead__copy">
-    <h1 id="masthead-title">Systems that hold up in production.</h1>
+    <h1 id="masthead-title">Systems that hold up in <span class="hand-underline">production.</span></h1>
     <p class="masthead__intro">{SITE.role}. {SITE.yearsExperience} years building web products and AI agents, and writing about what I learn along the way. Based in {SITE.location.city}, {SITE.location.country}.</p>
     <div class="masthead__actions">
       <a class="button button--primary" href="#experience">Explore my experience</a>
@@ -11,23 +11,44 @@ import { SITE, AVAILABILITY } from '@/config/site';
     </div>
     {AVAILABILITY.open && <p class="masthead__status"><span aria-hidden="true"></span>{AVAILABILITY.label}</p>}
   </div>
-  <div class="code-mark" aria-hidden="true"><div class="code-mark__back"></div><div class="code-mark__front"><svg viewBox="0 0 80 60" fill="none"><path d="m25 20-13 10 13 10m30-20 13 10-13 10M46 12 34 48" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg></div></div>
+  <div class="doodle" aria-hidden="true">
+    <span class="sketch-pill doodle__label">Shipping</span>
+    <div class="doodle__frame sketch-box">
+      <svg viewBox="0 0 200 150" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+        <!-- browser window -->
+        <path d="M22 28c50-2 104-1 150 1 2 30 1 62-1 92-48 2-100 1-148-1-2-30-2-62-1-92Z" fill="var(--mint-soft)" />
+        <path d="M23 46c48-1 100-1 148 1" />
+        <circle cx="34" cy="37" r="2.5" fill="currentColor" /><circle cx="44" cy="37" r="2.5" fill="currentColor" /><circle cx="54" cy="37" r="2.5" fill="currentColor" />
+        <!-- code brackets -->
+        <path d="M48 64 38 72l10 8M72 64l10 8-10 8M65 60l-9 26" />
+        <!-- code lines -->
+        <path d="M38 98h34M80 98h22" stroke="var(--mint)" stroke-width="4" />
+        <path d="M38 109h20M66 109h38" stroke="var(--mint)" stroke-width="4" />
+        <!-- magnifier -->
+        <circle cx="132" cy="84" r="22" fill="var(--card)" />
+        <circle cx="132" cy="84" r="22" fill="var(--mint)" fill-opacity=".35" />
+        <path d="m148 100 18 18" stroke-width="7" stroke="var(--mint-ink)" />
+        <path d="m148 100 18 18" />
+        <!-- sparks -->
+        <path d="M176 22l8-8M182 34l11-3M168 14l2-10" stroke="var(--accent)" />
+      </svg>
+    </div>
+  </div>
 </section>
 <style>
-.masthead { display:grid; grid-template-columns:minmax(0, 1.5fr) minmax(0, 1fr); align-items:center; gap:var(--space-xl); padding-block:var(--space-4xl) var(--space-3xl); }
-h1 { font-size:clamp(2.7rem, 4.9vw, 4.4rem); line-height:1.04; letter-spacing:-.025em; max-width:13ch; }
-.masthead__intro { margin-top:var(--space-md); max-width:46ch; font-size:1rem; color:var(--color-muted); line-height:1.65; }
-.masthead__actions { display:flex; flex-wrap:wrap; gap:var(--space-xs); margin-top:var(--space-lg); }
-.button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding: .65rem 1rem; border:1px solid var(--color-rule); color:var(--color-ink); background:var(--color-paper); font-size:.8125rem; font-weight:600; text-decoration:none; white-space:nowrap; transition:background var(--dur-short) var(--ease-out); }
-.button:hover { background:var(--color-paper-2); }
-.button--primary { background:var(--color-accent); border-color:var(--color-accent); color:var(--color-paper); }
-.button--primary:hover { background:var(--color-accent-text); }
-.masthead__status { display:flex; align-items:center; gap:.5rem; margin-top:var(--space-md); color:var(--color-faint); font-size:.75rem; }
-.masthead__status span { width:5px; height:5px; background:var(--color-accent); border-radius:50%; flex:none; }
-.code-mark { position:relative; width:180px; height:180px; justify-self:center; }
-.code-mark__front,.code-mark__back { position:absolute; inset:20px; border:1px solid var(--color-rule); border-radius:10px; }
-.code-mark__front { display:grid; place-items:center; transform:rotate(7deg); border-color:var(--color-accent); background:var(--color-paper); color:var(--color-accent); }
-.code-mark__front svg { width:75px; }
-.code-mark__back { transform:rotate(-7deg) translate(-12px,12px); }
-@media(max-width:40rem) { .masthead { grid-template-columns:minmax(0,1fr); padding-block:var(--space-2xl); gap:0; } h1 { font-size:clamp(2.7rem,10vw,3.8rem); max-width:15ch; } .code-mark { display:none; } }
+.masthead { display:grid; grid-template-columns:minmax(0, 1.4fr) minmax(0, 1fr); align-items:center; gap:var(--space-xl); padding-block:var(--space-3xl) var(--space-2xl); }
+h1 { isolation:isolate; font-size:clamp(2.6rem, 5vw, 4.2rem); line-height:1.08; max-width:14ch; }
+.masthead__intro { margin-top:var(--space-md); max-width:46ch; font-size:1.0625rem; color:var(--color-muted); line-height:1.65; }
+.masthead__actions { display:flex; flex-wrap:wrap; gap:var(--space-sm); margin-top:var(--space-lg); }
+.button { display:inline-flex; align-items:center; justify-content:center; min-height:44px; padding:.55rem 1.15rem; border:var(--sketch-w) solid var(--color-ink); border-radius:var(--wobble-pill); color:var(--color-ink); background:var(--card); font-family:var(--font-hand); font-size:1.0625rem; font-weight:700; text-decoration:none; white-space:nowrap; box-shadow:3px 3px 0 var(--color-ink); transition:transform var(--dur-micro) var(--ease-out), box-shadow var(--dur-micro) var(--ease-out); }
+.button:hover { transform:translate(-1px,-1px) rotate(-1deg); box-shadow:4px 4px 0 var(--color-ink); }
+.button:active { transform:translate(2px,2px); box-shadow:1px 1px 0 var(--color-ink); }
+.button--primary { background:var(--mint); }
+.masthead__status { display:flex; align-items:center; gap:.5rem; margin-top:var(--space-md); color:var(--color-muted); font-family:var(--font-hand); font-size:1rem; }
+.masthead__status span { width:10px; height:10px; background:var(--mint); border:2px solid var(--color-ink); border-radius:50%; flex:none; }
+.doodle { position:relative; justify-self:center; width:100%; max-width:300px; padding-top:1.25rem; }
+.doodle__label { position:absolute; top:0; left:50%; transform:translateX(-50%) rotate(-2deg); z-index:1; font-size:1.25rem; }
+.doodle__frame { padding:1.75rem 1rem 1rem; transform:rotate(1.5deg); color:var(--color-ink); }
+.doodle__frame svg { display:block; width:100%; }
+@media(max-width:40rem) { .masthead { grid-template-columns:minmax(0,1fr); padding-block:var(--space-2xl); gap:var(--space-xl); } h1 { font-size:clamp(2.4rem,10vw,3.4rem); max-width:15ch; } .doodle { max-width:240px; } }
 </style>

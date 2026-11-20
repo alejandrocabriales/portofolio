@@ -82,8 +82,8 @@ export const SITE = {
    * sRGB conversions of `--paper` in each theme.
    */
   themeColor: {
-    light: '#f7f5ee',
-    dark: '#222320',
+    light: '#fdfcf9',
+    dark: '#1d1e1c',
   },
 } as const;
 
