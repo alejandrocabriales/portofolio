@@ -31,7 +31,7 @@ const scale = (v: number) => ((width - labelW - valueW) * v) / max;
 const summary = rows.map((r) => `${r.label}: ${r.value}`).join('; ');
 ---
 
-<Figure title={title} subtitle={subtitle} source={source}>
+<Figure title={title} subtitle={subtitle} source={source} scroll>
   <svg viewBox={`0 0 ${width} ${height}`} role="img" aria-label={`${title}. ${summary}`}>
     {
       rows.map((r, i) => {

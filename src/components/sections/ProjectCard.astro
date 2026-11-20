@@ -1,220 +1,232 @@
 ---
 /**
- * A project card.
+ * A measured project, filed as a print session.
  *
- * Two sizes — `lead` for the first project, `standard` for the rest — because a
- * grid of three identical cards is the exact pattern that reads as generated.
- * The size difference also does real work: the lead card has room for the
- * measured outcome, which is the strongest thing on the page.
+ * Only projects with a figure get a session card — evidence decides weight on
+ * the page; the rest render as plain rows. The figure is printed: silver
+ * tones on a white-bordered print, the card's loudest element. Below it, the
+ * same three ruled stations on every card: Built, Shipped, Measured. A figure
+ * whose impact is still being measured prints dashed and under-developed.
  *
- * The whole card is a link to the case study; the live-site link is a separate,
- * nested affordance. Nested interactive elements need care, so the outer link
- * is the card's `::after` overlay and the inner link sits above it — one
- * accessible link each, no `<a>` inside `<a>`.
+ * The whole sheet links to the case study through a stretched `::after`; the
+ * live-site or write-up link sits above that overlay as its own target.
+ *
+ * Hover takes the card into the deeproom — brown ground, amber type — the
+ * way the contact sheet holds the prints. Not a lift or a shadow.
  */
 import type { Project } from '@/data/projects';
+import Arrow from '@/components/ui/Arrow.astro';
 
 interface Props {
   project: Project;
-  variant?: 'lead' | 'standard' | undefined;
 }
 
-const { project, variant = 'standard' } = Astro.props;
+const { project } = Astro.props;
 ---
 
-<article class:list={['card', `card--${variant}`]}>
-  <div class="card__head">
-    <h3 class="card__name">
-      <a href={`/work/${project.slug}/`} class="card__link">{project.name}</a>
+<article class="sheet">
+  <div class="sheet__top">
+    <h3 class="sheet__name">
+      <a href={`/work/${project.slug}/`} class="sheet__link">{project.name}</a>
     </h3>
-    <span class="card__year">{project.year}</span>
   </div>
 
-  <p class="card__context">{project.context}</p>
-  <p class="card__summary">{project.summary}</p>
-
   {
-    project.impact && (
-      <p class="card__impact">
-        <span class="card__impact-mark" aria-hidden="true" />
-        {project.impact}
+    project.figure && (
+      <p class:list={['sheet__figure', { 'sheet__figure--developing': project.figure.developing }]}>
+        <span class="sheet__value tabular">{project.figure.value}</span>
       </p>
     )
   }
 
-  <p class="card__stack">
-    {project.stack.map((tool) => <span>{tool}</span>)}
-  </p>
+  <p class="sheet__summary">{project.summary}</p>
 
-  {
-    /* No live site to link (client-private), but a write-up exists: the post
-      is the public evidence, so it takes the external link's slot. */
-    !project.url && project.writeup && (
-      <a class="card__external" href={project.writeup}>
-        Read the write-up
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M3 8h10M9 4l4 4-4 4" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </a>
-    )
-  }
-
-  {
-    project.url && (
-      <a class="card__external" href={project.url} target="_blank" rel="noopener noreferrer">
-        Visit live site
-        <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
-          <path d="M5 11 11 5M6 5h5v5" stroke-linecap="round" stroke-linejoin="round" />
-        </svg>
-      </a>
-    )
-  }
+  <!-- The same three stations for every project: what it was built with,
+    where and when it shipped, what it measurably changed. -->
+  <dl class="stations">
+    <div class="stations__row">
+      <dt>Built</dt>
+      <dd>{project.stack.join(', ')}</dd>
+    </div>
+    <div class="stations__row">
+      <dt>Shipped</dt>
+      <dd>
+        {project.context} · <time>{project.year}</time>
+        {
+          project.url && (
+            <a class="sheet__external" href={project.url} target="_blank" rel="noopener noreferrer">
+              Live site
+              <Arrow kind="out" />
+            </a>
+          )
+        }
+        {
+          !project.url && project.writeup && (
+            <a class="sheet__external" href={project.writeup}>
+              Write-up
+              <Arrow kind="next" />
+            </a>
+          )
+        }
+      </dd>
+    </div>
+    {
+      project.figure && (
+        <div class="stations__row">
+          <dt>Measured</dt>
+          <dd>
+            {project.figure.caption}
+            {project.figure.developing && <span class="stations__developing">{project.figure.developing}</span>}
+          </dd>
+        </div>
+      )
+    }
+  </dl>
 </article>
 
 <style>
-  .card {
+  .sheet {
     position: relative;
     display: flex;
     flex-direction: column;
     padding: var(--space-md);
-    border: var(--rule-hair) solid var(--color-rule);
-    border-radius: var(--radius-md);
+    border: var(--rule-heavy) solid var(--color-ink);
     background-color: var(--color-paper);
-    /* Only the properties that actually change — never `transition: all`. */
     transition:
-      border-color var(--dur-short) var(--ease-out),
-      background-color var(--dur-short) var(--ease-out);
+      background-color var(--dur-short) var(--ease-out),
+      color var(--dur-short) var(--ease-out),
+      border-color var(--dur-short) var(--ease-out);
   }
 
-  .card:hover {
-    border-color: var(--color-ink);
-    background-color: var(--color-paper-2);
+  .sheet:hover {
+    background-color: var(--color-field);
+    border-color: var(--color-field);
+    color: var(--color-on-field);
   }
 
-  /* One hairline at the top edge that takes the accent on hover. A single
-   * signal — no lift, no scale, no shadow. */
-  .card::before {
-    content: '';
-    position: absolute;
-    inset-block-start: -1px;
-    inset-inline: -1px;
-    block-size: 2px;
-    border-radius: var(--radius-md) var(--radius-md) 0 0;
-    background-color: transparent;
-    transition: background-color var(--dur-short) var(--ease-out);
-  }
-  .card:hover::before {
-    background-color: var(--color-accent);
+  .sheet__top {
+    padding-block-end: var(--space-sm);
+    border-block-end: var(--rule-hair) solid currentColor;
   }
 
-  .card__head {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    gap: var(--space-sm);
+  .sheet__name {
+    font-size: clamp(1.5rem, 1.2rem + 0.9vw, 2rem);
+    font-weight: 800;
+    font-stretch: var(--stretch-title);
+    line-height: 1;
+    letter-spacing: -0.02em;
   }
 
-  .card__name {
-    font-size: 1.25rem;
-    font-weight: 500;
-    letter-spacing: -0.015em;
-  }
-
-  .card--lead .card__name {
-    font-size: 1.75rem;
-  }
-
-  .card__link {
-    color: var(--color-ink);
+  .sheet__link {
+    color: inherit;
     text-decoration: none;
-    transition: color var(--dur-micro) var(--ease-out);
-  }
-  .card:hover .card__link {
-    color: var(--color-accent-text);
   }
 
-  /* Stretches the case-study link across the whole card without nesting it. */
-  .card__link::after {
+  /* Stretches the case-study link across the whole sheet. */
+  .sheet__link::after {
     content: '';
     position: absolute;
     inset: 0;
-    border-radius: inherit;
   }
 
-  .card__year {
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    font-variant-numeric: tabular-nums lining-nums;
-    color: var(--color-faint);
-    white-space: nowrap;
-  }
-
-  .card__context {
-    margin-block-start: var(--space-3xs);
-    font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--color-muted);
-  }
-
-  .card__summary {
-    margin-block-start: var(--space-sm);
-    color: var(--color-muted);
-    line-height: 1.6;
-  }
-
-  .card__impact {
-    display: flex;
-    align-items: baseline;
-    gap: var(--space-2xs);
-    margin-block-start: var(--space-sm);
-    font-size: 0.9375rem;
-    color: var(--color-ink);
-  }
-
-  .card__impact-mark {
-    inline-size: 0.5rem;
-    block-size: 0.5rem;
-    flex: none;
-    background-color: var(--color-accent);
-    /* A small square, not an emoji or a stray icon-library glyph. */
-    translate: 0 -0.05rem;
-  }
-
-  .card__stack {
+  .sheet__figure {
     margin-block-start: var(--space-md);
     display: flex;
-    flex-wrap: wrap;
-    gap: var(--space-3xs) var(--space-sm);
+    flex-direction: column;
+    gap: var(--space-2xs);
+  }
+
+  /* The print: white border, silver tones, the figure developed into it. */
+  .sheet__value {
+    display: block;
+    padding: var(--space-md) var(--space-sm) var(--space-sm);
+    border: 0.375rem solid var(--print-hi);
+    background: radial-gradient(ellipse 120% 100% at 25% 15%, var(--print-hi), var(--print-lo) 90%);
+    color: var(--print-ink);
+  }
+
+  .sheet__value {
+    font-family: var(--font-display);
+    font-stretch: var(--stretch-claim);
+    font-size: clamp(4rem, 2.4rem + 4.4vw, 7.5rem);
+    font-weight: 800;
+    line-height: 0.82;
+    letter-spacing: -0.04em;
+  }
+
+  .sheet__figure--developing .sheet__value {
+    border-style: dashed;
+    background: var(--print-lo);
+  }
+
+  .sheet__summary {
+    margin-block-start: var(--space-md);
+    max-inline-size: 52ch;
+    color: var(--color-muted);
+    line-height: 1.5;
+  }
+
+  .stations {
+    margin: auto 0 0;
+    padding-block-start: var(--space-md);
+  }
+
+  .stations__row {
+    display: grid;
+    grid-template-columns: 5.5rem minmax(0, 1fr);
+    gap: var(--space-sm);
+    align-items: baseline;
+    padding-block: var(--space-2xs);
+    border-block-start: var(--rule-hair) solid currentColor;
+  }
+
+  .stations__row dt {
     font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
+    font-size: 0.6875rem;
+    font-weight: 500;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--color-faint);
+  }
+
+  .stations__row dd {
+    margin: 0;
+    font-size: 0.875rem;
+    line-height: 1.45;
+  }
+
+  .stations__developing {
+    display: block;
+    margin-block-start: var(--space-3xs);
+    font-family: var(--font-mono);
+    font-stretch: var(--stretch-mono);
     font-size: 0.6875rem;
     color: var(--color-faint);
   }
 
-  .card__external {
-    /* Pushed to the bottom so cards in a row align their footers. */
-    margin-block-start: auto;
-    padding-block-start: var(--space-md);
-    display: inline-flex;
-    align-items: center;
-    gap: var(--space-3xs);
-    align-self: flex-start;
-    /* Above the stretched overlay so it stays independently clickable. */
+  .sheet__external {
     position: relative;
     z-index: 1;
+    margin-inline-start: var(--space-xs);
+    display: inline-flex;
     font-family: var(--font-mono);
-    font-size: 0.75rem;
-    color: var(--color-muted);
-    text-decoration: none;
-    white-space: nowrap;
-    transition: color var(--dur-micro) var(--ease-out);
-  }
-  .card__external:hover {
-    color: var(--color-accent-text);
+    font-stretch: var(--stretch-mono);
+    font-size: 0.6875rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    align-items: center;
+    color: inherit;
     text-decoration: underline;
-    text-underline-offset: 0.25em;
+    text-underline-offset: 0.3em;
+    white-space: nowrap;
   }
-  .card__external svg {
-    inline-size: 0.75rem;
-    block-size: 0.75rem;
+
+  /* In the deeproom every secondary tone goes to the dimmed amber. */
+  .sheet:hover :is(.sheet__summary, .stations__row dt, .stations__developing) {
+    color: var(--color-on-field-muted);
+  }
+  .sheet :focus-visible {
+    outline-color: var(--color-ink);
   }
 </style>

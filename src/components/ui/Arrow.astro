@@ -1,0 +1,52 @@
+---
+/**
+ * The site's one arrow pair, drawn — never a text glyph.
+ *
+ * `next` points along the reading line (same-site destination); `out` points
+ * up and away (external site). Square caps and miter joins, like the rules.
+ * Sized in `em` so it follows whatever type it sits beside; the stroke is set
+ * in viewBox units so it thickens with display-size type.
+ */
+interface Props {
+  kind?: 'next' | 'out' | undefined;
+  class?: string | undefined;
+}
+
+const { kind = 'next', class: className } = Astro.props;
+---
+
+<svg
+  class:list={['arrow', `arrow--${kind}`, className]}
+  viewBox="0 0 16 16"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.75"
+  stroke-linecap="square"
+  stroke-linejoin="miter"
+  aria-hidden="true"
+  focusable="false"
+>
+  {kind === 'next' ? <path d="M2 8h11M9 4l4 4-4 4" /> : <path d="M4.5 11.5 11 5M5.5 4.5H11.5V10.5" />}
+</svg>
+
+<style>
+  .arrow {
+    display: inline-block;
+    inline-size: 0.85em;
+    block-size: 0.85em;
+    flex: none;
+    vertical-align: -0.05em;
+    margin-inline-start: 0.3em;
+    transition: transform var(--dur-short) var(--ease-out);
+  }
+
+  /* Hover nudges along the arrow's own direction. */
+  :global(a:hover) > .arrow--next,
+  :global(a:hover) .arrow--next {
+    transform: translateX(0.15em);
+  }
+  :global(a:hover) > .arrow--out,
+  :global(a:hover) .arrow--out {
+    transform: translate(0.12em, -0.12em);
+  }
+</style>
