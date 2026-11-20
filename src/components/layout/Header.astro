@@ -6,9 +6,9 @@ import { SITE } from '@/config/site';
 <style>
 .header { background:var(--color-paper); }
 nav { max-width:var(--shell); margin-inline:auto; padding:var(--space-md) var(--gutter); display:flex; align-items:center; gap:var(--space-sm); min-height:80px; }
-.wordmark { font-family:var(--font-display); font-size:1.125rem; font-weight:700; color:var(--color-ink); text-decoration:none; white-space:nowrap; }
+.wordmark { font-family:var(--font-hand); font-size:1.5rem; padding:.05rem .75rem .15rem; background:var(--mint); border:var(--sketch-w) solid var(--color-ink); border-radius:var(--wobble-pill); transform:rotate(-2deg); font-weight:700; color:var(--color-ink); text-decoration:none; white-space:nowrap; }
 .links { display:flex; align-items:center; gap:var(--space-md); margin-left:auto; }
-.links a { color:var(--color-muted); text-decoration:none; font-size:.8125rem; white-space:nowrap; padding-block:.75rem; }
-.links a:hover { color:var(--color-accent-text); }
+.links a { color:var(--color-ink); text-decoration:none; font-family:var(--font-hand); font-size:1.125rem; font-weight:700; white-space:nowrap; padding-block:.75rem; }
+.links a:hover { color:var(--color-accent-text); text-decoration:underline wavy var(--color-accent); text-underline-offset:5px; }
 @media(max-width:40rem) { nav { flex-wrap:wrap; gap:0 var(--space-xs); padding-block:var(--space-sm); } .wordmark { margin-right:auto; } .links { order:3; width:100%; margin-left:0; justify-content:space-between; } }
 </style>

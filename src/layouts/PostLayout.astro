@@ -112,9 +112,8 @@ const crumbs = breadcrumbNode(url, [
     flex-wrap: wrap;
     gap: var(--space-2xs);
     padding-block-start: var(--space-xl);
-    font-family: var(--font-mono);
-    font-stretch: var(--stretch-mono);
-    font-size: 0.75rem;
+    font-family: var(--font-hand);
+    font-size: 1rem;
     color: var(--color-faint);
   }
   .crumb a {
@@ -137,11 +136,9 @@ const crumbs = breadcrumbNode(url, [
 
   .post-header__title {
     font-size: var(--text-display-s);
-    font-weight: 800;
-    font-stretch: var(--stretch-claim);
-    line-height: 0.92;
-    letter-spacing: -0.03em;
-    max-inline-size: 20ch;
+    font-weight: 700;
+    line-height: 1.1;
+    max-inline-size: 22ch;
   }
 
   /* Date and reading time sit under the title, as PostMeta documents —
@@ -161,14 +158,18 @@ const crumbs = breadcrumbNode(url, [
     margin-block-start: var(--space-md);
     display: flex;
     flex-wrap: wrap;
-    gap: var(--space-2xs) var(--space-sm);
+    gap: var(--space-2xs);
     font-family: var(--font-mono);
     font-stretch: var(--stretch-mono);
     font-size: 0.75rem;
   }
 
   .post-header__tags a {
-    color: var(--color-faint);
+    padding: 0.15rem 0.6rem;
+    background: var(--mint-soft);
+    border: 1.5px solid var(--color-ink);
+    border-radius: var(--wobble-pill);
+    color: var(--color-ink);
     text-decoration: none;
     transition: color var(--dur-micro) var(--ease-out);
   }

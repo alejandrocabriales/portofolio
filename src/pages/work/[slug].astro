@@ -72,9 +72,9 @@ const sheet = [
       <article>
         <!-- The case study opens in the deeproom, like the home page contact sheet: the
           project name at claim scale, its spec sheet beside it. -->
-        <header class="study bleed">
+        <header class="study">
           <div class="study__inner">
-            <nav class="study__crumb annot" aria-label="Breadcrumb">
+            <nav class="study__crumb" aria-label="Breadcrumb">
               <a href="/">Home</a>
               <span aria-hidden="true">/</span>
               <a href="/#work">Work</a>
@@ -112,19 +112,19 @@ const sheet = [
 
         <div class="body">
           <section class="block">
-            <h2 class="block__label annot">The problem</h2>
+            <h2 class="block__label">The problem</h2>
             <p class="block__text">{project.problem}</p>
           </section>
 
           <section class="block">
-            <h2 class="block__label annot">What I did</h2>
+            <h2 class="block__label">What I did</h2>
             <p class="block__text">{project.contribution}</p>
           </section>
 
           {
             (project.url || project.repo || project.writeup) && (
               <section class="block">
-                <h2 class="block__label annot">Links</h2>
+                <h2 class="block__label">Links</h2>
                 <ul class="block__links">
                   {project.writeup && (
                     <li>
@@ -179,24 +179,27 @@ const sheet = [
 <style>
   /* ---- deeproom header ---------------------------------------------------- */
   .study {
-    background-color: var(--color-field);
-    color: var(--color-on-field);
+    margin-block-start: var(--space-lg);
+    background-color: var(--mint-soft);
+    color: var(--color-ink);
+    border: var(--sketch-w) solid var(--color-ink);
+    border-radius: var(--wobble);
   }
 
   .study__inner {
-    max-inline-size: var(--shell);
-    margin-inline: auto;
-    padding: var(--space-md) var(--gutter) var(--space-xl);
+    padding: var(--space-md) clamp(1rem, 4vw, var(--space-xl)) var(--space-xl);
   }
 
   .study__crumb {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2xs);
-    color: var(--color-on-field-muted);
+    font-family: var(--font-hand);
+    font-size: 1rem;
+    color: var(--color-muted);
   }
   .study__crumb a {
-    color: var(--color-on-field);
+    color: var(--color-ink);
     text-underline-offset: 0.3em;
   }
 
@@ -209,13 +212,9 @@ const sheet = [
   }
 
   .study__title {
-    word-spacing: 0.14em;
-    text-transform: uppercase;
     font-size: var(--text-wall);
-    font-weight: 800;
-    font-stretch: var(--stretch-claim);
-    line-height: 0.86;
-    letter-spacing: -0.035em;
+    font-weight: 700;
+    line-height: 1.05;
   }
 
   .study__summary {
@@ -223,12 +222,16 @@ const sheet = [
     max-inline-size: 48ch;
     font-size: 1.1875rem;
     line-height: 1.45;
-    color: var(--color-on-field);
+    color: var(--color-muted);
   }
 
   .study__sheet {
     margin: 0;
-    border: var(--rule-heavy) solid var(--color-on-field);
+    background: var(--card);
+    border: var(--sketch-w) solid var(--color-ink);
+    border-radius: var(--wobble-2);
+    overflow: hidden;
+    transform: rotate(1deg);
   }
 
   .study__row,
@@ -241,12 +244,12 @@ const sheet = [
   }
 
   .study__row {
-    border-block-end: var(--rule-hair) solid color-mix(in oklab, var(--color-on-field) 45%, transparent);
+    border-block-end: 2px dashed var(--color-rule);
   }
 
   .study__row dt,
   .study__impact dt {
-    color: var(--color-on-field-muted);
+    color: var(--color-muted);
   }
 
   .study__row dd,
@@ -259,22 +262,21 @@ const sheet = [
 
   /* The measured outcome is the sheet's solid amber block. */
   .study__impact {
-    background-color: var(--color-on-field);
-    color: var(--color-field);
+    background-color: var(--orange-fill);
+    color: var(--ink);
   }
   .study__impact dt {
-    color: var(--color-field);
+    color: var(--ink);
   }
   .study__impact dd {
     font-family: var(--font-display);
-    font-stretch: var(--stretch-title);
     font-size: 1.375rem;
-    font-weight: 800;
+    font-weight: 700;
     line-height: 1.1;
   }
 
   .study :focus-visible {
-    outline-color: var(--color-on-field);
+    outline-color: var(--color-focus);
   }
 
   /* ---- body: ruled rows, label column ------------------------------------ */
@@ -287,11 +289,22 @@ const sheet = [
     grid-template-columns: 12rem minmax(0, 1fr);
     gap: var(--space-md) var(--space-xl);
     padding-block: var(--space-lg);
-    border-block-start: var(--rule-heavy) solid var(--color-ink);
+    border-block-start: 2px dashed var(--color-rule);
+  }
+  .block:first-child {
+    border-block-start: 0;
   }
 
   .block__label {
-    color: var(--color-ink);
+    align-self: start;
+    justify-self: start;
+    padding: 0.1rem 0.9rem 0.2rem;
+    background: var(--orange-fill);
+    border-radius: var(--wobble-pill);
+    color: var(--ink);
+    font-size: 1.25rem;
+    line-height: 1.3;
+    transform: rotate(-1.5deg);
   }
 
   .block__text {
@@ -308,21 +321,19 @@ const sheet = [
     flex-wrap: wrap;
     gap: var(--space-xs) var(--space-lg);
     font-family: var(--font-display);
-    font-stretch: var(--stretch-title);
     font-size: 1.375rem;
-    font-weight: 800;
+    font-weight: 700;
   }
 
   .block__links a {
     display: inline-flex;
     align-items: center;
-    color: var(--color-accent-text);
-    text-decoration: underline;
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.2em;
+    color: var(--color-ink);
+    text-decoration: underline wavy var(--color-accent);
+    text-underline-offset: 0.3em;
   }
   .block__links a:hover {
-    text-decoration-thickness: 4px;
+    color: var(--color-accent-text);
   }
 
   @media (max-width: 52rem) {
